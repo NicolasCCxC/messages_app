@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IndexFileEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.persistence.entity</a> &gt; <span class="el_source">IndexFileEntity.java</span></div><h1>IndexFileEntity.java</h1><pre class="source lang-java linenums">package avvillas.core.persistence.entity;
+
+import avvillas.core.constant.enums.LoadStatus;
+import avvillas.core.persistence.audit.AuditableEntity;
+
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+
+@Entity
+@Table(name = &quot;archivo_indices&quot;, indexes = {
+        @Index(name = &quot;idx_archivo_indices_producto_id&quot;, columnList = &quot;producto_id&quot;),
+        @Index(name = &quot;idx_archivo_indices_periodo&quot;, columnList = &quot;periodo&quot;),
+        @Index(name = &quot;idx_archivo_indices_estado&quot;, columnList = &quot;estado&quot;),
+})
+<span class="nc" id="L29">@Data</span>
+<span class="fc" id="L30">@NoArgsConstructor</span>
+<span class="nc" id="L31">@AllArgsConstructor</span>
+<span class="nc bnc" id="L32" title="All 74 branches missed.">@EqualsAndHashCode(callSuper = true)</span>
+public class IndexFileEntity extends AuditableEntity implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = &quot;id&quot;, length = 36)
+<span class="nc" id="L38">    private String id;</span>
+
+    @Column(name = &quot;process_id&quot;, length = 36)
+<span class="nc" id="L41">    private String processId;</span>
+
+    @Column(name = &quot;producto_id&quot;, length = 36, nullable = false)
+<span class="nc" id="L44">    private String productId;</span>
+
+    @Column(name = &quot;periodo&quot;, length = 8)
+<span class="nc" id="L47">    private String period;</span>
+
+    @Column(name = &quot;usuario&quot;, length = 100)
+<span class="nc" id="L50">    private String user;</span>
+
+<span class="pc" id="L52">    @Enumerated(EnumType.STRING)</span>
+    @Column(name = &quot;estado&quot;, length = 20)
+<span class="nc" id="L54">    private LoadStatus status = LoadStatus.ACTIVO;</span>
+
+    @Column(name = &quot;ruta_salida_extracto&quot;, length = 255)
+<span class="nc" id="L57">    private String route;</span>
+
+    @Column(name = &quot;clientes_procesados&quot;)
+<span class="nc" id="L60">    private Integer clientsProcessed;</span>
+
+    @Column(name = &quot;avance&quot;)
+<span class="nc" id="L63">    private int percentAdvance;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

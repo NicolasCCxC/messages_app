@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExtractProcessorServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl</a> &gt; <span class="el_source">ExtractProcessorServiceImpl.java</span></div><h1>ExtractProcessorServiceImpl.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl;
+
+import avvillas.core.constant.message.ExtractMessage;
+import avvillas.core.service.EmailNotificationService;
+import avvillas.core.service.dto.format.FormatDto;
+import avvillas.core.service.extract_generation.ClientDataService;
+import avvillas.core.service.extract_generation.ExtractProcessorService;
+import avvillas.core.service.extract_generation.HtmlTemplateService;
+import avvillas.core.service.extract_generation.PdfGenerationService;
+import avvillas.core.service.extract_generation.ProcessStateService;
+import avvillas.core.service.implementations.extract_generation_impl.config.ExtractProperties;
+import avvillas.core.service.implementations.extract_generation_impl.config.InMemoryPdf;
+import avvillas.core.web.traits.FormatTrait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
+
+@Service
+public class ExtractProcessorServiceImpl implements ExtractProcessorService {
+
+<span class="fc" id="L40">    private static final Logger logger = LoggerFactory.getLogger(ExtractProcessorServiceImpl.class);</span>
+
+    private final Executor producerExecutor;
+    private final Executor consumerExecutor;
+    private final ExtractProperties extractProperties;
+    private final ClientDataService clientDataService;
+    private final HtmlTemplateService htmlTemplateService;
+    private final PdfGenerationService pdfGenerationService;
+    private final ProcessStateService processStateService;
+    private final FormatTrait formatTrait;
+    private final EmailNotificationService emailNotificationService;
+
+    public ExtractProcessorServiceImpl(
+            @Qualifier(&quot;producerTaskExecutor&quot;) Executor producerExecutor,
+            @Qualifier(&quot;consumerTaskExecutor&quot;) Executor consumerExecutor,
+            ExtractProperties extractProperties,
+            ClientDataService clientDataService,
+            HtmlTemplateService htmlTemplateService,
+            PdfGenerationService pdfGenerationService,
+            ProcessStateService processStateService,
+            FormatTrait formatTrait,
+<span class="fc" id="L61">            EmailNotificationService emailNotificationService) {</span>
+<span class="fc" id="L62">        this.producerExecutor = producerExecutor;</span>
+<span class="fc" id="L63">        this.consumerExecutor = consumerExecutor;</span>
+<span class="fc" id="L64">        this.extractProperties = extractProperties;</span>
+<span class="fc" id="L65">        this.clientDataService = clientDataService;</span>
+<span class="fc" id="L66">        this.htmlTemplateService = htmlTemplateService;</span>
+<span class="fc" id="L67">        this.pdfGenerationService = pdfGenerationService;</span>
+<span class="fc" id="L68">        this.processStateService = processStateService;</span>
+<span class="fc" id="L69">        this.formatTrait = formatTrait;</span>
+<span class="fc" id="L70">        this.emailNotificationService = emailNotificationService;</span>
+<span class="fc" id="L71">    }</span>
+
+    @Override
+    @Async(&quot;consumerTaskExecutor&quot;)
+    public void processExtractsAsync(String extractId, String productId, String processId, String routeExitExtract, int clientsProcessed, String productName, String token) {
+<span class="nc" id="L76">        Instant startProcess = Instant.now();</span>
+<span class="nc" id="L77">        logger.info(&quot;[PASO 2][ID: {}] Proceso asíncrono iniciado. Hilo: {}. Total de clientes a procesar: {}&quot;,</span>
+<span class="nc" id="L78">                extractId, Thread.currentThread().getName(), clientsProcessed);</span>
+
+<span class="nc" id="L80">        final AtomicBoolean isProcessFailed = new AtomicBoolean(false);</span>
+<span class="nc" id="L81">        final int consumerCount = extractProperties.getPerformance().getConsumerPool().getMaxSize();</span>
+<span class="nc" id="L82">        BlockingQueue&lt;Map&lt;String, Object&gt;&gt; clientDataQueue = new LinkedBlockingQueue&lt;&gt;(extractProperties.getPerformance().getQueueCapacity());</span>
+
+        try {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            if (clientsProcessed == 0) throw new IllegalStateException(ExtractMessage.EXTRACT_ERROR_NOT_DATA);</span>
+
+<span class="nc" id="L87">            validateOutputDirectory(extractId, routeExitExtract, clientsProcessed);</span>
+
+<span class="nc" id="L89">            final FormatDto format = formatTrait.getFormatByProductId(productId, token);</span>
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if (format.getHtmlContent() == null)</span>
+<span class="nc" id="L92">                throw new IllegalStateException(&quot;El formato no cuenta con una plantilla HTML configurada&quot;);</span>
+            
+<span class="nc" id="L94">            final String baseHtmlTemplate = format.getHtmlContent();</span>
+
+<span class="nc" id="L96">            CompletableFuture.runAsync(() -&gt; {</span>
+<span class="nc" id="L97">                Thread.currentThread().setName(&quot;Extract-Producer-&quot; + extractId);</span>
+<span class="nc" id="L98">                clientDataService.produceClientData(processId, clientDataQueue, consumerCount, isProcessFailed);</span>
+<span class="nc" id="L99">            }, producerExecutor);</span>
+
+<span class="nc" id="L101">            final AtomicLong processedCounter = new AtomicLong(0);</span>
+
+<span class="nc" id="L103">            Runnable consumerTask = () -&gt; {</span>
+                try {
+<span class="nc" id="L105">                    Thread.currentThread().setName(&quot;Extract-Consumer-&quot; + Thread.currentThread().getId());</span>
+
+<span class="nc" id="L107">                    final int BATCH_SIZE = extractProperties.getPerformance().getPdfWriteBatchSize();</span>
+<span class="nc" id="L108">                    List&lt;InMemoryPdf&gt; pdfBatch = new ArrayList&lt;&gt;(BATCH_SIZE);</span>
+
+                    try {
+                        while (true) {
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                            if (isProcessFailed.get()) {</span>
+<span class="nc" id="L114">                                logger.warn(&quot;Consumidor {} deteniendose por senal de fallo.&quot;, Thread.currentThread().getName());</span>
+<span class="nc" id="L115">                                break;</span>
+                            }
+
+<span class="nc" id="L118">                            Map&lt;String, Object&gt; clientData = clientDataQueue.take();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                            if (clientData == ClientDataServiceImpl.END_OF_QUEUE) break;</span>
+
+<span class="nc" id="L121">                            Instant startClient = Instant.now();</span>
+
+<span class="nc" id="L123">                            Instant startHtml = Instant.now();</span>
+<span class="nc" id="L124">                            String finalHtml = htmlTemplateService.prepareClientHtml(baseHtmlTemplate, clientData, format);</span>
+<span class="nc" id="L125">                            long htmlDuration = Duration.between(startHtml, Instant.now()).toMillis();</span>
+
+<span class="nc" id="L127">                            Instant startPdf = Instant.now();</span>
+
+<span class="nc" id="L129">                            byte[] pdfBytes = pdfGenerationService.generatePdf(clientData, finalHtml);</span>
+<span class="nc" id="L130">                            long pdfDuration = Duration.between(startPdf, Instant.now()).toMillis();</span>
+
+<span class="nc bnc" id="L132" title="All 4 branches missed.">                            if (pdfBytes != null &amp;&amp; pdfBytes.length &gt; 0) {</span>
+<span class="nc" id="L133">                                String fileName = clientData.getOrDefault(&quot;fileName&quot;, &quot;extract-&quot; + System.currentTimeMillis()) + &quot;.pdf&quot;;</span>
+<span class="nc" id="L134">                                pdfBatch.add(new InMemoryPdf(fileName, pdfBytes));</span>
+                            }
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                            if (pdfBatch.size() &gt;= BATCH_SIZE) {</span>
+<span class="nc" id="L138">                                writeBatchToDisk(extractId, routeExitExtract, pdfBatch);</span>
+<span class="nc" id="L139">                                pdfBatch.clear();</span>
+                            }
+
+<span class="nc" id="L142">                            long totalClientDuration = Duration.between(startClient, Instant.now()).toMillis();</span>
+<span class="nc" id="L143">                            logger.debug(&quot;[PASO 3][ID: {}] Cliente procesado en {}ms (HTML: {}ms, PDF: {}ms)&quot;,</span>
+<span class="nc" id="L144">                                    extractId, totalClientDuration, htmlDuration, pdfDuration);</span>
+
+<span class="nc" id="L146">                            long currentCount = processedCounter.incrementAndGet();</span>
+<span class="nc" id="L147">                            processStateService.updateProgress(extractId, currentCount, clientsProcessed);</span>
+<span class="nc" id="L148">                        }</span>
+<span class="nc" id="L149">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L150">                        Thread.currentThread().interrupt();</span>
+<span class="nc" id="L151">                    } catch (Exception e) {</span>
+<span class="nc" id="L152">                        logger.error(&quot;FALLO CRITICO EN CONSUMIDOR {}. Deteniendo todo el proceso.&quot;, Thread.currentThread().getName(), e);</span>
+<span class="nc" id="L153">                        isProcessFailed.set(true);</span>
+                    } finally {
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                        if (!pdfBatch.isEmpty()) {</span>
+<span class="nc" id="L156">                            writeBatchToDisk(extractId, routeExitExtract, pdfBatch);</span>
+<span class="nc" id="L157">                            pdfBatch.clear();</span>
+                        }
+                    }
+                } finally {
+<span class="nc" id="L161">                    PdfGenerationServiceImpl.cleanupThread();</span>
+                }
+<span class="nc" id="L163">            };</span>
+
+<span class="nc" id="L165">            List&lt;CompletableFuture&lt;Void&gt;&gt; consumerFutures = IntStream.range(0, consumerCount)</span>
+<span class="nc" id="L166">                    .mapToObj(i -&gt; CompletableFuture.runAsync(consumerTask, consumerExecutor))</span>
+<span class="nc" id="L167">                    .toList();</span>
+
+<span class="nc" id="L169">            CompletableFuture.allOf(consumerFutures.toArray(new CompletableFuture[0])).join();</span>
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            if (isProcessFailed.get()) {</span>
+<span class="nc" id="L172">                throw new RuntimeException(&quot;El proceso de generacion de extractos fallo. Revisar logs para mas detalles.&quot;);</span>
+            }
+
+<span class="nc" id="L175">            long totalDurationSeconds = Duration.between(startProcess, Instant.now()).toSeconds();</span>
+<span class="nc" id="L176">            long totalProcessed = processedCounter.get();</span>
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            double avgTimePerPdf = (totalProcessed &gt; 0) ? (double) (totalDurationSeconds * 1000) / totalProcessed : 0;</span>
+<span class="nc" id="L179">            String formattedAvgTime = String.format(&quot;%.2f&quot;, avgTimePerPdf);</span>
+<span class="nc" id="L180">            logger.info(&quot;[PASO 4][ID: {}] Proceso FINALIZADO CON ÉXITO. {} de {} extractos generados en {}s (Promedio: {} ms/extracto).&quot;,</span>
+<span class="nc" id="L181">                    extractId, totalProcessed, clientsProcessed, totalDurationSeconds, formattedAvgTime);</span>
+
+<span class="nc" id="L183">            processStateService.markAsCompleted(extractId, &quot;Proceso completado. &quot; + processedCounter.get() + &quot; de &quot; + clientsProcessed + &quot; extractos generados.&quot;);</span>
+
+<span class="nc" id="L185">            emailNotificationService.sendProcessStatusNotification(</span>
+                    productName,
+                    ExtractMessage.FINISH,
+                    ExtractMessage.EXTRACT_FINISH,
+                    ExtractMessage.SUBJECT_EXTRACTS
+            );
+
+<span class="nc" id="L192">        } catch (Exception e) {</span>
+<span class="nc" id="L193">            long errorDurationSeconds = Duration.between(startProcess, Instant.now()).toSeconds();</span>
+
+<span class="nc" id="L195">            logger.error(&quot;[PASO 4][ID: {}] Proceso FINALIZADO CON ERROR después de {}s. Causa: {}&quot;,</span>
+<span class="nc" id="L196">                    extractId, errorDurationSeconds, e.getMessage());</span>
+<span class="nc" id="L197">            String errorMessage = e.getMessage();</span>
+<span class="nc" id="L198">            processStateService.markAsFailed(extractId, errorMessage);</span>
+
+<span class="nc" id="L200">            emailNotificationService.sendProcessStatusNotification(</span>
+                    productName,
+                    ExtractMessage.ERROR,
+<span class="nc" id="L203">                    String.format(ExtractMessage.EXTRACT_ERROR, errorMessage),</span>
+                    ExtractMessage.SUBJECT_EXTRACTS
+            );
+<span class="nc" id="L206">        }</span>
+<span class="nc" id="L207">    }</span>
+
+    private void writeBatchToDisk(String extractId, String outputPath, List&lt;InMemoryPdf&gt; pdfBatch) {
+<span class="nc" id="L210">        Instant startWrite = Instant.now();</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        for (InMemoryPdf pdf : pdfBatch) {</span>
+            try {
+<span class="nc" id="L213">                Path filePath = Paths.get(outputPath, pdf.fileName());</span>
+<span class="nc" id="L214">                Files.write(filePath, pdf.content());</span>
+<span class="nc" id="L215">            } catch (IOException e) {</span>
+<span class="nc" id="L216">                logger.error(&quot;[{}] Fallo al escribir el archivo {} en disco.&quot;, extractId, pdf.fileName(), e);</span>
+<span class="nc" id="L217">            }</span>
+<span class="nc" id="L218">        }</span>
+<span class="nc" id="L219">        long writeDuration = Duration.between(startWrite, Instant.now()).toMillis();</span>
+<span class="nc" id="L220">        logger.info(&quot;[{}] Lote de {} PDFs escrito en disco en {}ms.&quot;, extractId, pdfBatch.size(), writeDuration);</span>
+<span class="nc" id="L221">    }</span>
+
+
+    private void validateOutputDirectory(String extractId, String outputPath, int clientsToProcess) throws IOException {
+<span class="nc bnc" id="L225" title="All 4 branches missed.">        if (outputPath == null || outputPath.isBlank()) {</span>
+<span class="nc" id="L226">            throw new IllegalArgumentException(&quot;La ruta de salida no puede ser nula o vacía.&quot;);</span>
+        }
+
+<span class="nc" id="L229">        Path directory = Paths.get(outputPath);</span>
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (!Files.exists(directory)) {</span>
+<span class="nc" id="L232">            Files.createDirectories(directory);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        } else if (!Files.isDirectory(directory)) {</span>
+<span class="nc" id="L234">            throw new IOException(&quot;La ruta de salida '&quot; + outputPath + &quot;' existe pero no es un directorio.&quot;);</span>
+        }
+
+<span class="nc" id="L237">        long requiredSpaceBytes = (long) clientsToProcess * extractProperties.getPerformance().getPdfMaxSizeKb() * 1024;</span>
+<span class="nc" id="L238">        long usableSpaceBytes = Files.getFileStore(directory).getUsableSpace();</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (usableSpaceBytes &lt; requiredSpaceBytes) {</span>
+<span class="nc" id="L241">            String requiredSpaceMB = String.format(&quot;%.2f MB&quot;, requiredSpaceBytes / (1024.0 * 1024.0));</span>
+<span class="nc" id="L242">            String usableSpaceMB = String.format(&quot;%.2f MB&quot;, usableSpaceBytes / (1024.0 * 1024.0));</span>
+<span class="nc" id="L243">            throw new IOException(</span>
+<span class="nc" id="L244">                    String.format(&quot;Espacio insuficiente en disco. Requerido: ~%s, Disponible: %s.&quot;, requiredSpaceMB, usableSpaceMB)</span>
+            );
+        }
+
+<span class="nc" id="L248">        logger.info(&quot;[{}] Validación de espacio en disco exitosa. (Requerido: ~{} MB, Disponible: {} MB)&quot;,</span>
+                extractId,
+<span class="nc" id="L250">                (long) (requiredSpaceBytes / (1024.0 * 1024.0)),</span>
+<span class="nc" id="L251">                (long) (usableSpaceBytes / (1024.0 * 1024.0))</span>
+        );
+<span class="nc" id="L253">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

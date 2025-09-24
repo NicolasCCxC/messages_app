@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RequestWrapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.web.configuration.security.filter</a> &gt; <span class="el_source">RequestWrapper.java</span></div><h1>RequestWrapper.java</h1><pre class="source lang-java linenums">package avvillas.core.web.configuration.security.filter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+
+import java.io.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+public class RequestWrapper extends HttpServletRequestWrapper {
+    private final String body;
+<span class="nc" id="L17">    private static final ObjectMapper objectMapper = new ObjectMapper();</span>
+<span class="nc" id="L18">    private static final Set&lt;String&gt; MALICIOUS_PATTERNS = Set.of(</span>
+            &quot;&lt;script&quot;, &quot;javascript:&quot;, &quot;vbscript:&quot;,
+            &quot;onload=&quot;, &quot;onerror=&quot;, &quot;onclick=&quot;,
+            &quot;alert(&quot;, &quot;eval(&quot;, &quot;document.cookie&quot;,
+            &quot;union select&quot;, &quot;drop table&quot;, &quot;--&quot;,
+            &quot;' or '1'='1&quot;, &quot;\&quot; or \&quot;1\&quot;=\&quot;1&quot;,
+            &quot;exec(&quot;, &quot;execute(&quot;, &quot;WAITFOR DELAY&quot;,
+            &quot;declare @&quot;, &quot;'; exec&quot;, &quot;'; declare&quot;,
+            &quot;../../&quot;, &quot;../&quot;, &quot;..\\&quot;, &quot;\\\\&quot;,
+            &quot;; declare&quot;, &quot;; exec&quot;, &quot;; select&quot;,
+            &quot;/*&quot;, &quot;*/&quot;, &quot;@@&quot;
+    );
+<span class="nc" id="L30">    private static final Map&lt;String, String&gt; HTML_ENTITIES = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L31">    private static final Pattern ROUTE_PATTERN = Pattern.compile(&quot;([&lt;&gt;\&quot;'])&quot;);</span>
+<span class="nc" id="L32">    private static final Pattern DEFAULT_PATTERN = Pattern.compile(&quot;([&lt;&gt;\&quot;'/\\\\])&quot;);</span>
+
+    static {
+<span class="nc" id="L35">        HTML_ENTITIES.put(&quot;&lt;&quot;, &quot;&amp;lt;&quot;);</span>
+<span class="nc" id="L36">        HTML_ENTITIES.put(&quot;&gt;&quot;, &quot;&amp;gt;&quot;);</span>
+<span class="nc" id="L37">        HTML_ENTITIES.put(&quot;\&quot;&quot;, &quot;&amp;quot;&quot;);</span>
+<span class="nc" id="L38">        HTML_ENTITIES.put(&quot;'&quot;, &quot;&amp;#x27;&quot;);</span>
+<span class="nc" id="L39">        HTML_ENTITIES.put(&quot;/&quot;, &quot;&amp;#x2F;&quot;);</span>
+<span class="nc" id="L40">        HTML_ENTITIES.put(&quot;\\&quot;, &quot;&amp;#x5C;&quot;);</span>
+<span class="nc" id="L41">    }</span>
+
+    public RequestWrapper(HttpServletRequest request) throws IOException {
+<span class="nc" id="L44">        super(request);</span>
+<span class="nc" id="L45">        String requestBody = getRequestBody(request);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        this.body = isJsonRequest(request) ?</span>
+<span class="nc" id="L47">                sanitizeJsonBody(requestBody) :</span>
+<span class="nc" id="L48">                sanitizeInput(requestBody);</span>
+<span class="nc" id="L49">    }</span>
+
+    private String getRequestBody(HttpServletRequest request) throws IOException {
+<span class="nc" id="L52">        StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="nc" id="L53">        try (InputStream inputStream = request.getInputStream();</span>
+<span class="nc" id="L54">             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {</span>
+
+<span class="nc" id="L56">            char[] charBuffer = new char[128];</span>
+            int bytesRead;
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            while ((bytesRead = bufferedReader.read(charBuffer)) &gt; 0) {</span>
+<span class="nc" id="L59">                stringBuilder.append(charBuffer, 0, bytesRead);</span>
+            }
+        }
+<span class="nc" id="L62">        return stringBuilder.toString();</span>
+    }
+
+    private boolean isJsonRequest(HttpServletRequest request) {
+<span class="nc" id="L66">        return Optional.ofNullable(request.getContentType())</span>
+<span class="nc" id="L67">                .map(String::toLowerCase)</span>
+<span class="nc" id="L68">                .filter(contentType -&gt; contentType.contains(&quot;application/json&quot;))</span>
+<span class="nc" id="L69">                .isPresent();</span>
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+<span class="nc" id="L74">        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());</span>
+
+<span class="nc" id="L76">        return new ServletInputStream() {</span>
+            @Override
+            public boolean isFinished() {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                return byteArrayInputStream.available() == 0;</span>
+            }
+
+            @Override
+            public boolean isReady() {
+<span class="nc" id="L84">                return true;</span>
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+<span class="nc" id="L89">                throw new UnsupportedOperationException(&quot;setReadListener no soportado&quot;);</span>
+            }
+
+            @Override
+            public int read() throws IOException {
+<span class="nc" id="L94">                return byteArrayInputStream.read();</span>
+            }
+        };
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+<span class="nc" id="L101">        return new BufferedReader(new InputStreamReader(this.getInputStream()));</span>
+    }
+
+    @Override
+    public String getParameter(String name) {
+<span class="nc" id="L106">        return Optional.ofNullable(super.getParameter(name))</span>
+<span class="nc" id="L107">                .map(this::sanitizeInput)</span>
+<span class="nc" id="L108">                .orElse(null);</span>
+    }
+
+    @Override
+    public Map&lt;String, String[]&gt; getParameterMap() {
+<span class="nc" id="L113">        Map&lt;String, String[]&gt; originalMap = super.getParameterMap();</span>
+<span class="nc" id="L114">        Map&lt;String, String[]&gt; sanitizedMap = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L116">        originalMap.forEach((key, values) -&gt; {</span>
+<span class="nc" id="L117">            String[] sanitizedValues = new String[values.length];</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L119">                sanitizedValues[i] = sanitizeInput(values[i]);</span>
+            }
+<span class="nc" id="L121">            sanitizedMap.put(sanitizeInput(key), sanitizedValues);</span>
+<span class="nc" id="L122">        });</span>
+
+<span class="nc" id="L124">        return Map.copyOf(sanitizedMap);</span>
+    }
+
+    private String sanitizeJsonBody(String jsonBody) {
+        try {
+<span class="nc bnc" id="L129" title="All 4 branches missed.">            if (jsonBody == null || jsonBody.isEmpty()) {</span>
+<span class="nc" id="L130">                return jsonBody;</span>
+            }
+
+<span class="nc" id="L133">            Map&lt;String, Object&gt; jsonMap = objectMapper.readValue(jsonBody, Map.class);</span>
+<span class="nc" id="L134">            Map&lt;String, Object&gt; sanitizedMap = sanitizeMap(jsonMap);</span>
+
+<span class="nc" id="L136">            return objectMapper.writeValueAsString(sanitizedMap);</span>
+<span class="nc" id="L137">        } catch (IOException e) {</span>
+<span class="nc" id="L138">            return jsonBody;</span>
+        }
+    }
+
+    private Map&lt;String, Object&gt; sanitizeMap(Map&lt;String, Object&gt; map) {
+<span class="nc" id="L143">        return map.entrySet().stream()</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                .filter(entry -&gt; entry.getValue() != null)</span>
+<span class="nc" id="L145">                .collect(Collectors.toMap(</span>
+                        Map.Entry::getKey,
+                        entry -&gt; {
+<span class="nc" id="L148">                            Object value = entry.getValue();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">                            if (value instanceof String) {</span>
+<span class="nc" id="L150">                                return sanitizeInput((String) value);</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                            } else if (value instanceof Map) {</span>
+<span class="nc" id="L152">                                return sanitizeMap((Map&lt;String, Object&gt;) value);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                            } else if (value instanceof List) {</span>
+<span class="nc" id="L154">                                return sanitizeList((List&lt;Object&gt;) value);</span>
+                            } else {
+<span class="nc" id="L156">                                return value;</span>
+                            }
+                        }
+                ));
+    }
+
+    private List&lt;Object&gt; sanitizeList(List&lt;Object&gt; list) {
+<span class="nc" id="L163">        return list.stream()</span>
+<span class="nc" id="L164">                .filter(Objects::nonNull)</span>
+<span class="nc" id="L165">                .map(item -&gt; {</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                    if (item instanceof String) {</span>
+<span class="nc" id="L167">                        return sanitizeInput((String) item);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                    } else if (item instanceof Map) {</span>
+<span class="nc" id="L169">                        return sanitizeMap((Map&lt;String, Object&gt;) item);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                    } else if (item instanceof List) {</span>
+<span class="nc" id="L171">                        return sanitizeList((List&lt;Object&gt;) item);</span>
+                    } else {
+<span class="nc" id="L173">                        return item;</span>
+                    }
+                })
+<span class="nc" id="L176">                .toList();</span>
+    }
+
+    private String sanitizeInput(String input) {
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (input == null) return null;</span>
+
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (isRoute(input)) {</span>
+<span class="nc" id="L183">            return replaceUsingPattern(input, ROUTE_PATTERN);</span>
+        }
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        return containsMaliciousContent(input)</span>
+<span class="nc" id="L187">                ? &quot;&quot;</span>
+<span class="nc" id="L188">                : replaceUsingPattern(input, DEFAULT_PATTERN);</span>
+    }
+
+    private String replaceUsingPattern(String input, Pattern pattern) {
+<span class="nc" id="L192">        Matcher matcher = pattern.matcher(input);</span>
+<span class="nc" id="L193">        StringBuffer sb = new StringBuffer();</span>
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        while (matcher.find()) {</span>
+<span class="nc" id="L196">            String replacement = HTML_ENTITIES.getOrDefault(matcher.group(1), matcher.group(1));</span>
+<span class="nc" id="L197">            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));</span>
+<span class="nc" id="L198">        }</span>
+<span class="nc" id="L199">        matcher.appendTail(sb);</span>
+
+<span class="nc" id="L201">        return sb.toString();</span>
+    }
+
+    private boolean isRoute(String input) {
+<span class="nc bnc" id="L205" title="All 4 branches missed.">        return input.contains(&quot;/&quot;) || input.contains(&quot;\\&quot;);</span>
+    }
+
+    private boolean containsMaliciousContent(String input) {
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (input == null) return false;</span>
+<span class="nc" id="L210">        String lowerInput = input.toLowerCase();</span>
+<span class="nc" id="L211">        return MALICIOUS_PATTERNS.stream().anyMatch(lowerInput::contains);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientDataServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl</a> &gt; <span class="el_source">ClientDataServiceImpl.java</span></div><h1>ClientDataServiceImpl.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl;
+
+import avvillas.core.persistence.entity.id.ProcessDataId;
+import avvillas.core.persistence.repository.ProcessDataRepository;
+import avvillas.core.service.extract_generation.ClientDataService;
+import avvillas.core.service.implementations.extract_generation_impl.config.ExtractProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
+
+@Service
+public class ClientDataServiceImpl implements ClientDataService {
+
+<span class="fc" id="L27">    protected static final Map&lt;String, Object&gt; END_OF_QUEUE = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L28">    private static final Logger logger = LoggerFactory.getLogger(ClientDataServiceImpl.class);</span>
+    private final ProcessDataRepository processDataRepository;
+    private final ObjectMapper objectMapper;
+    private final Executor producerTaskExecutor;
+    private final ExtractProperties extractProperties;
+
+    public ClientDataServiceImpl(ProcessDataRepository processDataRepository,
+                                 ObjectMapper objectMapper,
+                                 @Qualifier(&quot;producerTaskExecutor&quot;) Executor producerTaskExecutor,
+<span class="fc" id="L37">                                 ExtractProperties extractProperties) {</span>
+<span class="fc" id="L38">        this.processDataRepository = processDataRepository;</span>
+<span class="fc" id="L39">        this.objectMapper = objectMapper;</span>
+<span class="fc" id="L40">        this.producerTaskExecutor = producerTaskExecutor;</span>
+<span class="fc" id="L41">        this.extractProperties = extractProperties;</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public void produceClientData(String processId, BlockingQueue&lt;Map&lt;String, Object&gt;&gt; queue, int consumerCount, AtomicBoolean isProcessFailed) {
+<span class="nc" id="L46">        producerTaskExecutor.execute(() -&gt; {</span>
+<span class="nc" id="L47">            Thread.currentThread().setName(&quot;ExtractProducer-&quot; + processId);</span>
+<span class="nc" id="L48">            logger.info(&quot;[{}] Iniciando producción de datos (Estrategia Paginada)...&quot;, processId);</span>
+
+<span class="nc" id="L50">            int pageNumber = 0;</span>
+<span class="nc" id="L51">            final int batchSize = extractProperties.getPerformance().getProducerPool().getIdBatchSize();</span>
+            Page&lt;String&gt; clientIdsPage;
+
+            try {
+                do {
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                    if (isProcessFailed.get()) {</span>
+<span class="nc" id="L58">                        logger.warn(&quot;[{}] Proceso de produccion detenido debido a un fallo en otro hilo.&quot;, processId);</span>
+<span class="nc" id="L59">                        break;</span>
+                    }
+
+<span class="nc" id="L62">                    PageRequest pageable = PageRequest.of(pageNumber, batchSize);</span>
+<span class="nc" id="L63">                    clientIdsPage = processDataRepository.findClientIdsByProcessId(processId, pageable);</span>
+<span class="nc" id="L64">                    clientIdsPage.getContent().parallelStream().forEach(clientId -&gt;</span>
+<span class="nc" id="L65">                        processDataRepository.findById(new ProcessDataId(processId, clientId))</span>
+<span class="nc" id="L66">                                .ifPresent(customer -&gt; {</span>
+                                    try {
+<span class="nc" id="L68">                                        queue.put(deserializeData(customer.getData()));</span>
+<span class="nc" id="L69">                                    } catch (Exception e) {</span>
+<span class="nc" id="L70">                                        logger.error(&quot;[{}] Error encolando cliente {}.&quot;, processId, clientId, e);</span>
+<span class="nc" id="L71">                                    }</span>
+<span class="nc" id="L72">                                })</span>
+                    );
+<span class="nc" id="L74">                    logger.debug(&quot;[{}] Lote de página {} procesado ({} clientes).&quot;, processId, pageNumber, clientIdsPage.getNumberOfElements());</span>
+<span class="nc" id="L75">                    pageNumber++;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">                } while (clientIdsPage.hasNext());</span>
+
+<span class="nc" id="L78">                logger.info(&quot;[{}] Producción de datos finalizada. Enviando señales de fin.&quot;, processId);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                for (int i = 0; i &lt; consumerCount; i++) {</span>
+<span class="nc" id="L80">                    queue.put(END_OF_QUEUE);</span>
+                }
+<span class="nc" id="L82">            } catch (Exception e) {</span>
+<span class="nc" id="L83">                logger.error(&quot;[{}] La producción de datos falló catastróficamente.&quot;, processId, e);</span>
+<span class="nc" id="L84">                isProcessFailed.set(true);</span>
+            } finally {
+<span class="nc" id="L86">                logger.info(&quot;[{}] Produccion finalizada (o fallida). Enviando senales de fin de cola.&quot;, processId);</span>
+                try {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                    for (int i = 0; i &lt; consumerCount; i++) {</span>
+<span class="nc" id="L89">                        queue.put(END_OF_QUEUE);</span>
+                    }
+<span class="nc" id="L91">                } catch (InterruptedException ex) {</span>
+<span class="nc" id="L92">                    Thread.currentThread().interrupt();</span>
+<span class="nc" id="L93">                }</span>
+            }
+<span class="nc" id="L95">        });</span>
+<span class="nc" id="L96">    }</span>
+
+
+    @Override
+    public Stream&lt;Map&lt;String, String&gt;&gt; streamClientData(String processId) {
+<span class="nc" id="L101">        return Stream.empty();</span>
+    }
+
+    private Map&lt;String, Object&gt; deserializeData(byte[] data) throws Exception {
+<span class="nc" id="L105">        String jsonString = new String(data, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L106">        Map&lt;String, Object&gt; rawData = objectMapper.readValue(jsonString, HashMap.class);</span>
+<span class="nc" id="L107">        Map&lt;String, Object&gt; clientData = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        for (Map.Entry&lt;String, Object&gt; entry : rawData.entrySet()) {</span>
+<span class="nc" id="L110">            String key = entry.getKey();</span>
+<span class="nc" id="L111">            Object value = entry.getValue();</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (value == null) {</span>
+<span class="nc" id="L114">                clientData.put(key, &quot;&quot;);</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            } else if (value instanceof ArrayList) {</span>
+<span class="nc" id="L116">                clientData.put(key, value);</span>
+            } else {
+<span class="nc" id="L118">                clientData.put(key, value.toString());</span>
+            }
+<span class="nc" id="L120">        }</span>
+<span class="nc" id="L121">        return clientData;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

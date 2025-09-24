@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IndexFileSpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.specification</a> &gt; <span class="el_source">IndexFileSpecification.java</span></div><h1>IndexFileSpecification.java</h1><pre class="source lang-java linenums">package avvillas.core.service.specification;
+
+import avvillas.core.constant.fields.IndexFileFieldNames;
+import avvillas.core.persistence.entity.IndexFileEntity;
+import org.springframework.data.jpa.domain.Specification;
+
+public class IndexFileSpecification {
+
+    private IndexFileSpecification() {}
+
+    public static Specification&lt;IndexFileEntity&gt; filterByProductId(String search) {
+<span class="nc" id="L12">        return SpecificationUtils.likeIgnoreCase(IndexFileFieldNames.PRODUCT_ID.getFieldName(), search);</span>
+    }
+
+    public static Specification&lt;IndexFileEntity&gt; filterByPeriod(String search) {
+
+<span class="nc" id="L17">        return SpecificationUtils.likeIgnoreCase(IndexFileFieldNames.PERIOD.getFieldName(), search);</span>
+    }
+
+    public static Specification&lt;IndexFileEntity&gt; filterByStatus(String search) {
+<span class="nc" id="L21">        return SpecificationUtils.likeIgnoreCase(IndexFileFieldNames.STATUS.getFieldName(), search);</span>
+    }
+
+    public static Specification&lt;IndexFileEntity&gt; filterByPercentAdvance(String search) {
+<span class="nc" id="L25">        return SpecificationUtils.equalNumber(IndexFileFieldNames.PERCENT_ADVANCE.getFieldName(), search);</span>
+    }
+
+    public static Specification&lt;IndexFileEntity&gt; filterByUser(String search) {
+<span class="nc" id="L29">        return SpecificationUtils.likeIgnoreCase(IndexFileFieldNames.USER.getFieldName(), search);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
