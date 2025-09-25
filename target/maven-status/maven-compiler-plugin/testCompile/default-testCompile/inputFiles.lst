@@ -8,3 +8,4 @@
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/specification/SpecificationUtilsTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/exception/GlobalExceptionHandlerTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/index_file/IndexFileControllerTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/traits/FormatTraitTest.java
