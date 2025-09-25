@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: avvillas.core.service.specification.SpecificationUtilsTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.079 s -- in avvillas.core.service.specification.SpecificationUtilsTest

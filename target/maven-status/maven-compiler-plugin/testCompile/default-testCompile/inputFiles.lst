@@ -7,8 +7,11 @@
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/index_file_generation_impl/IndexFileServiceImplTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/specification/SpecificationUtilsTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/ExtractControllerTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/exception/GlobalExceptionHandlerAdditionalTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/exception/GlobalExceptionHandlerTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/index_file/IndexFileControllerTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/index_file/IndexFileGetControllerTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/traits/FormatTraitCatchTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/traits/FormatTraitTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/traits/LoaderTraitTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/traits/ProductTraitTest.java

@@ -32,10 +32,6 @@ public class ExtractController {
     public ResponseEntity<ApiResponse<ExtractDto>> generateExtract(@Valid @RequestBody ExtractDto request, Authentication authentication) {
         Authentication auth = authentication != null ? authentication : SecurityContextHolder.getContext().getAuthentication();
         String userId = auth != null ? auth.getName() : null;
-        if (userId == null || userId.isBlank()) {
-            // Fallback for test profile or environments without security context
-            userId = request.getUser() != null && !request.getUser().isBlank() ? request.getUser() : "user-123";
-        }
         ExtractDto extract = extractService.generateExtracts(request, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="avvillas.core.web.controller.index_file.IndexFileControllerTest" time="15.652" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="avvillas.core.web.controller.index_file.IndexFileControllerTest" time="14.725" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -15,7 +15,7 @@
     <property name="user.country" value="CO"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="/Users/nicolassanchez/Library/Java/JavaVirtualMachines/corretto-21.0.6/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925115851328_3.jar /Users/nicolassanchez/Desktop/messages_app/target/surefire 2025-09-25T11-58-51_286-jvmRun1 surefire-20250925115851328_1tmp surefire_0-20250925115851328_2tmp"/>
+    <property name="sun.java.command" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925165124171_3.jar /Users/nicolassanchez/Desktop/messages_app/target/surefire 2025-09-25T16-51-24_125-jvmRun1 surefire-20250925165124171_1tmp surefire_0-20250925165124171_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="avvillas.core.web.controller.index_file.IndexFileControllerTest"/>
@@ -35,7 +35,7 @@
     <property name="FILE_LOG_CHARSET" value="UTF-8"/>
     <property name="java.awt.headless" value="true"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925115851328_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925165124171_3.jar"/>
     <property name="polyglot.engine.WarnInterpreterOnly" value="false"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
@@ -58,7 +58,7 @@
     <property name="user.dir" value="/Users/nicolassanchez/Desktop/messages_app"/>
     <property name="os.arch" value="aarch64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="PID" value="8454"/>
+    <property name="PID" value="5022"/>
     <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
     <property name="native.encoding" value="UTF-8"/>
     <property name="java.library.path" value="/Users/nicolassanchez/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
@@ -71,9 +71,9 @@
     <property name="java.class.version" value="65.0"/>
     <property name="LOGGED_APPLICATION_NAME" value="[core] "/>
   </properties>
-  <testcase name="shouldGenerateIndexFile" classname="avvillas.core.web.controller.index_file.IndexFileControllerTest" time="0.149">
-    <system-out><![CDATA[11:58:52.008 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [avvillas.core.web.controller.index_file.IndexFileControllerTest]: IndexFileControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-11:58:52.138 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration avvillas.core.CoreApplication for test class avvillas.core.web.controller.index_file.IndexFileControllerTest
+  <testcase name="shouldGenerateIndexFile" classname="avvillas.core.web.controller.index_file.IndexFileControllerTest" time="0.142">
+    <system-out><![CDATA[16:51:24.849 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [avvillas.core.web.controller.index_file.IndexFileControllerTest]: IndexFileControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+16:51:24.973 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration avvillas.core.CoreApplication for test class avvillas.core.web.controller.index_file.IndexFileControllerTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -84,23 +84,23 @@
 
  :: Spring Boot ::                (v3.4.2)
 
-2025-09-25T11:58:52.521-05:00  INFO 8454 --- [core] [           main] a.c.w.c.i.IndexFileControllerTest        : Starting IndexFileControllerTest using Java 21.0.6 with PID 8454 (started by nicolassanchez in /Users/nicolassanchez/Desktop/messages_app)
-2025-09-25T11:58:52.522-05:00  INFO 8454 --- [core] [           main] a.c.w.c.i.IndexFileControllerTest        : The following 1 profile is active: "test"
-2025-09-25T11:58:53.047-05:00  INFO 8454 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-09-25T11:58:53.102-05:00  INFO 8454 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 48 ms. Found 4 JPA repository interfaces.
-2025-09-25T11:58:54.550-05:00  INFO 8454 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-09-25T11:58:55.984-05:00  INFO 8454 --- [core] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@3e5de25e
-2025-09-25T11:58:55.986-05:00  INFO 8454 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-09-25T11:58:56.095-05:00  INFO 8454 --- [core] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=ON)(ADDRESS=(PROTOCOL=TCP)(HOST=142.93.9.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE))) (Oracle 21.3)
-2025-09-25T11:58:57.182-05:00  INFO 8454 --- [core] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.219s)
-2025-09-25T11:58:58.105-05:00  INFO 8454 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "CORE": 1
-2025-09-25T11:58:58.295-05:00  INFO 8454 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Schema "CORE" is up to date. No migration necessary.
-2025-09-25T11:58:58.587-05:00  INFO 8454 --- [core] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-09-25T11:58:58.636-05:00  INFO 8454 --- [core] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
-2025-09-25T11:58:58.663-05:00  INFO 8454 --- [core] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-09-25T11:58:58.786-05:00  INFO 8454 --- [core] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-09-25T11:58:59.115-05:00  WARN 8454 --- [core] [           main] org.hibernate.orm.deprecation            : HHH90000025: OracleDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-09-25T11:58:59.334-05:00  INFO 8454 --- [core] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-25T16:51:25.348-05:00  INFO 5022 --- [core] [           main] a.c.w.c.i.IndexFileControllerTest        : Starting IndexFileControllerTest using Java 21.0.6 with PID 5022 (started by nicolassanchez in /Users/nicolassanchez/Desktop/messages_app)
+2025-09-25T16:51:25.349-05:00  INFO 5022 --- [core] [           main] a.c.w.c.i.IndexFileControllerTest        : The following 1 profile is active: "test"
+2025-09-25T16:51:25.872-05:00  INFO 5022 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-25T16:51:25.933-05:00  INFO 5022 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 54 ms. Found 4 JPA repository interfaces.
+2025-09-25T16:51:27.557-05:00  INFO 5022 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-25T16:51:28.862-05:00  INFO 5022 --- [core] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@5a6e1d26
+2025-09-25T16:51:28.863-05:00  INFO 5022 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-25T16:51:28.960-05:00  INFO 5022 --- [core] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=ON)(ADDRESS=(PROTOCOL=TCP)(HOST=142.93.9.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE))) (Oracle 21.3)
+2025-09-25T16:51:29.946-05:00  INFO 5022 --- [core] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.199s)
+2025-09-25T16:51:30.829-05:00  INFO 5022 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "CORE": 1
+2025-09-25T16:51:30.997-05:00  INFO 5022 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Schema "CORE" is up to date. No migration necessary.
+2025-09-25T16:51:31.267-05:00  INFO 5022 --- [core] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-25T16:51:31.314-05:00  INFO 5022 --- [core] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2025-09-25T16:51:31.340-05:00  INFO 5022 --- [core] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-25T16:51:31.436-05:00  INFO 5022 --- [core] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-25T16:51:31.754-05:00  WARN 5022 --- [core] [           main] org.hibernate.orm.deprecation            : HHH90000025: OracleDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-25T16:51:31.945-05:00  INFO 5022 --- [core] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
 	Database version: 21.3
@@ -108,16 +108,16 @@
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-09-25T11:59:00.022-05:00  INFO 8454 --- [core] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-09-25T11:59:05.833-05:00  INFO 8454 --- [core] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-09-25T11:59:06.034-05:00  INFO 8454 --- [core] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-09-25T11:59:06.632-05:00  INFO 8454 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ProducerTaskExecutor: CoreSize=2, MaxSize=4, QueueCapacity=100, Name=ExtractProducer-
-2025-09-25T11:59:06.637-05:00  INFO 8454 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ConsumerTaskExecutor: CoreSize=4, MaxSize=8, QueueCapacity=100, Name=ExtractConsumer-
-2025-09-25T11:59:06.930-05:00  WARN 8454 --- [core] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-09-25T11:59:07.342-05:00  INFO 8454 --- [core] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2025-09-25T11:59:07.342-05:00  INFO 8454 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2025-09-25T11:59:07.343-05:00  INFO 8454 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
-2025-09-25T11:59:07.361-05:00  INFO 8454 --- [core] [           main] a.c.w.c.i.IndexFileControllerTest        : Started IndexFileControllerTest in 15.105 seconds (process running for 15.961)
+2025-09-25T16:51:32.643-05:00  INFO 5022 --- [core] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-25T16:51:37.642-05:00  INFO 5022 --- [core] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-25T16:51:37.874-05:00  INFO 5022 --- [core] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-25T16:51:38.440-05:00  INFO 5022 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ProducerTaskExecutor: CoreSize=2, MaxSize=4, QueueCapacity=100, Name=ExtractProducer-
+2025-09-25T16:51:38.447-05:00  INFO 5022 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ConsumerTaskExecutor: CoreSize=4, MaxSize=8, QueueCapacity=100, Name=ExtractConsumer-
+2025-09-25T16:51:38.852-05:00  WARN 5022 --- [core] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-25T16:51:39.254-05:00  INFO 5022 --- [core] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2025-09-25T16:51:39.255-05:00  INFO 5022 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2025-09-25T16:51:39.255-05:00  INFO 5022 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2025-09-25T16:51:39.274-05:00  INFO 5022 --- [core] [           main] a.c.w.c.i.IndexFileControllerTest        : Started IndexFileControllerTest in 14.182 seconds (process running for 15.035)
 ]]></system-out>
     <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
 WARNING: A Java agent has been loaded dynamically (/Users/nicolassanchez/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar)

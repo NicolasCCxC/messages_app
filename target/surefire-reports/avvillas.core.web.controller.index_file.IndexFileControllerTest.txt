@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: avvillas.core.web.controller.index_file.IndexFileControllerTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.65 s -- in avvillas.core.web.controller.index_file.IndexFileControllerTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.73 s -- in avvillas.core.web.controller.index_file.IndexFileControllerTest

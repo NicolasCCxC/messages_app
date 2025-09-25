@@ -1,16 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: avvillas.core.web.controller.ExtractControllerTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 16.05 s <<< FAILURE! -- in avvillas.core.web.controller.ExtractControllerTest
-avvillas.core.web.controller.ExtractControllerTest.shouldGenerateExtracts -- Time elapsed: 0.024 s <<< FAILURE!
-java.lang.AssertionError: No value at JSON path "$.data.productId"
-	at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:351)
-	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:148)
-	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:112)
-	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
-	at avvillas.core.web.controller.ExtractControllerTest.shouldGenerateExtracts(ExtractControllerTest.java:77)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-Caused by: com.jayway.jsonpath.PathNotFoundException: Expected to find an object with property ['productId'] in path $['data'] but found 'null'. This is not a json object according to the JsonProvider: 'com.jayway.jsonpath.spi.json.JsonSmartJsonProvider'.
-
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.31 s -- in avvillas.core.web.controller.ExtractControllerTest
