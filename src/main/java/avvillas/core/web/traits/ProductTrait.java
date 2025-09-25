@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -23,36 +24,52 @@ public class ProductTrait {
     private static final String LOADER_SERVICE = "loader";
 
     public List<ProductCodeDescriptionDTO> searchProducts(String searchTerm) {
-        String resource = "product?search=" + searchTerm + "&getAll=true";
-        ResponseEntity<ApiResponse<PageResponse<ProductDTO>>> response = communication.communicateWithMicroservice(
-                LOADER_SERVICE,
-                resource,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {
-                }
-        );
-        return Objects.requireNonNull(response.getBody()).getData().getContent()
-                .stream()
-                .map(p -> new ProductCodeDescriptionDTO(p.getId(), p.getCode(), p.getDescription()))
-                .toList();
+        try {
+            String resource = "product?search=" + searchTerm + "&getAll=true";
+            ResponseEntity<ApiResponse<PageResponse<ProductDTO>>> response = communication.communicateWithMicroservice(
+                    LOADER_SERVICE,
+                    resource,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+            PageResponse<ProductDTO> page = Optional.ofNullable(response.getBody())
+                    .map(ApiResponse::getData)
+                    .orElse(null);
+            if (page == null || page.getContent() == null) {
+                return Collections.emptyList();
+            }
+            return page.getContent()
+                    .stream()
+                    .map(p -> new ProductCodeDescriptionDTO(p.getId(), p.getCode(), p.getDescription()))
+                    .toList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     public List<ProductCodeDescriptionDTO> getProductsByIds(List<String> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
+        try {
+            String resource = "product/bulk";
+            ResponseEntity<ApiResponse<List<ProductCodeDescriptionDTO>>> response = communication.communicateWithMicroservice(
+                    LOADER_SERVICE,
+                    resource,
+                    HttpMethod.POST,
+                    ids,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
 
-        String resource = "product/bulk";
-        ResponseEntity<ApiResponse<List<ProductCodeDescriptionDTO>>> response = communication.communicateWithMicroservice(
-                LOADER_SERVICE,
-                resource,
-                HttpMethod.POST,
-                ids,
-                new ParameterizedTypeReference<>() {
-                }
-        );
-
-        return Objects.requireNonNull(response.getBody()).getData();
+            List<ProductCodeDescriptionDTO> data = Optional.ofNullable(response.getBody())
+                    .map(ApiResponse::getData)
+                    .orElse(null);
+            return data != null ? data : Collections.emptyList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 }
