@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: avvillas.core.service.implementations.extract_generation_impl.PdfGenerationServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.392 s <<< FAILURE! -- in avvillas.core.service.implementations.extract_generation_impl.PdfGenerationServiceImplTest
+avvillas.core.service.implementations.extract_generation_impl.PdfGenerationServiceImplTest.generatePdf_success_minimalHtml -- Time elapsed: 0.373 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Returned PDF should not be empty ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at avvillas.core.service.implementations.extract_generation_impl.PdfGenerationServiceImplTest.generatePdf_success_minimalHtml(PdfGenerationServiceImplTest.java:42)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

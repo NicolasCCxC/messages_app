@@ -1,5 +1,6 @@
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/CoreApplicationTests.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/extract_generation_impl/ClientDataServiceImplTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/extract_generation_impl/PdfGenerationServiceImplTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/extract_generation_impl/html/HtmlElementRendererTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/index_file_generation_impl/IndexFileAsyncProcessorTest.java
 /Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/index_file_generation_impl/IndexFileProcessorLogicTest.java
