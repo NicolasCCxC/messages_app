@@ -1,1 +1,9 @@
-/Users/nicolassanchez--desarrolladorestandar/Desktop/avvillas-api-core/src/test/java/avvillas/core/CoreApplicationTests.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/CoreApplicationTests.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/extract_generation_impl/ClientDataServiceImplTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/extract_generation_impl/html/HtmlElementRendererTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/index_file_generation_impl/IndexFileAsyncProcessorTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/index_file_generation_impl/IndexFileProcessorLogicTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/implementations/index_file_generation_impl/IndexFileServiceImplTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/service/specification/SpecificationUtilsTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/exception/GlobalExceptionHandlerTest.java
+/Users/nicolassanchez/Desktop/messages_app/src/test/java/avvillas/core/web/controller/index_file/IndexFileControllerTest.java
