@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="avvillas.core.web.controller.ExtractControllerTest" time="18.009" tests="2" errors="0" skipped="0" failures="1">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="avvillas.core.web.controller.ExtractControllerTest" time="16.053" tests="2" errors="0" skipped="0" failures="1">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -15,7 +15,7 @@
     <property name="user.country" value="CO"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="/Users/nicolassanchez/Library/Java/JavaVirtualMachines/corretto-21.0.6/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925120102137_3.jar /Users/nicolassanchez/Desktop/messages_app/target/surefire 2025-09-25T12-01-02_093-jvmRun1 surefire-20250925120102137_1tmp surefire_0-20250925120102137_2tmp"/>
+    <property name="sun.java.command" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925143151395_3.jar /Users/nicolassanchez/Desktop/messages_app/target/surefire 2025-09-25T14-31-51_354-jvmRun1 surefire-20250925143151395_1tmp surefire_0-20250925143151395_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="avvillas.core.web.controller.ExtractControllerTest"/>
@@ -35,7 +35,7 @@
     <property name="FILE_LOG_CHARSET" value="UTF-8"/>
     <property name="java.awt.headless" value="true"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925120102137_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/nicolassanchez/Desktop/messages_app/target/surefire/surefirebooter-20250925143151395_3.jar"/>
     <property name="polyglot.engine.WarnInterpreterOnly" value="false"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
@@ -58,7 +58,7 @@
     <property name="user.dir" value="/Users/nicolassanchez/Desktop/messages_app"/>
     <property name="os.arch" value="aarch64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="PID" value="8489"/>
+    <property name="PID" value="11089"/>
     <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
     <property name="native.encoding" value="UTF-8"/>
     <property name="java.library.path" value="/Users/nicolassanchez/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
@@ -71,9 +71,9 @@
     <property name="java.class.version" value="65.0"/>
     <property name="LOGGED_APPLICATION_NAME" value="[core] "/>
   </properties>
-  <testcase name="shouldReturnBadRequestOnValidationErrors" classname="avvillas.core.web.controller.ExtractControllerTest" time="0.152">
-    <system-out><![CDATA[12:01:02.830 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [avvillas.core.web.controller.ExtractControllerTest]: ExtractControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-12:01:02.952 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration avvillas.core.CoreApplication for test class avvillas.core.web.controller.ExtractControllerTest
+  <testcase name="shouldReturnBadRequestOnValidationErrors" classname="avvillas.core.web.controller.ExtractControllerTest" time="0.142">
+    <system-out><![CDATA[14:31:52.065 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [avvillas.core.web.controller.ExtractControllerTest]: ExtractControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+14:31:52.188 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration avvillas.core.CoreApplication for test class avvillas.core.web.controller.ExtractControllerTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -84,23 +84,23 @@
 
  :: Spring Boot ::                (v3.4.2)
 
-2025-09-25T12:01:03.309-05:00  INFO 8489 --- [core] [           main] a.c.w.controller.ExtractControllerTest   : Starting ExtractControllerTest using Java 21.0.6 with PID 8489 (started by nicolassanchez in /Users/nicolassanchez/Desktop/messages_app)
-2025-09-25T12:01:03.310-05:00  INFO 8489 --- [core] [           main] a.c.w.controller.ExtractControllerTest   : The following 1 profile is active: "test"
-2025-09-25T12:01:03.818-05:00  INFO 8489 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-09-25T12:01:03.872-05:00  INFO 8489 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 48 ms. Found 4 JPA repository interfaces.
-2025-09-25T12:01:05.372-05:00  INFO 8489 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-09-25T12:01:06.902-05:00  INFO 8489 --- [core] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@e8b6bb7
-2025-09-25T12:01:06.904-05:00  INFO 8489 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-09-25T12:01:07.027-05:00  INFO 8489 --- [core] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=ON)(ADDRESS=(PROTOCOL=TCP)(HOST=142.93.9.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE))) (Oracle 21.3)
-2025-09-25T12:01:08.232-05:00  INFO 8489 --- [core] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.244s)
-2025-09-25T12:01:09.421-05:00  INFO 8489 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "CORE": 1
-2025-09-25T12:01:09.635-05:00  INFO 8489 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Schema "CORE" is up to date. No migration necessary.
-2025-09-25T12:01:09.920-05:00  INFO 8489 --- [core] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-09-25T12:01:09.964-05:00  INFO 8489 --- [core] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
-2025-09-25T12:01:09.988-05:00  INFO 8489 --- [core] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-09-25T12:01:10.080-05:00  INFO 8489 --- [core] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-09-25T12:01:10.441-05:00  WARN 8489 --- [core] [           main] org.hibernate.orm.deprecation            : HHH90000025: OracleDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-09-25T12:01:10.677-05:00  INFO 8489 --- [core] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-25T14:31:52.553-05:00  INFO 11089 --- [core] [           main] a.c.w.controller.ExtractControllerTest   : Starting ExtractControllerTest using Java 21.0.6 with PID 11089 (started by nicolassanchez in /Users/nicolassanchez/Desktop/messages_app)
+2025-09-25T14:31:52.554-05:00  INFO 11089 --- [core] [           main] a.c.w.controller.ExtractControllerTest   : The following 1 profile is active: "test"
+2025-09-25T14:31:53.080-05:00  INFO 11089 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-25T14:31:53.137-05:00  INFO 11089 --- [core] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50 ms. Found 4 JPA repository interfaces.
+2025-09-25T14:31:55.059-05:00  INFO 11089 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-25T14:31:56.525-05:00  INFO 11089 --- [core] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@d67d742
+2025-09-25T14:31:56.526-05:00  INFO 11089 --- [core] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-25T14:31:56.635-05:00  INFO 11089 --- [core] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=ON)(ADDRESS=(PROTOCOL=TCP)(HOST=142.93.9.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE))) (Oracle 21.3)
+2025-09-25T14:31:57.712-05:00  INFO 11089 --- [core] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.235s)
+2025-09-25T14:31:58.767-05:00  INFO 11089 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "CORE": 1
+2025-09-25T14:31:58.956-05:00  INFO 11089 --- [core] [           main] o.f.core.internal.command.DbMigrate      : Schema "CORE" is up to date. No migration necessary.
+2025-09-25T14:31:59.220-05:00  INFO 11089 --- [core] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-25T14:31:59.265-05:00  INFO 11089 --- [core] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2025-09-25T14:31:59.288-05:00  INFO 11089 --- [core] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-25T14:31:59.379-05:00  INFO 11089 --- [core] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-25T14:31:59.698-05:00  WARN 11089 --- [core] [           main] org.hibernate.orm.deprecation            : HHH90000025: OracleDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-25T14:31:59.910-05:00  INFO 11089 --- [core] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
 	Database version: 21.3
@@ -108,16 +108,16 @@
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-09-25T12:01:11.331-05:00  INFO 8489 --- [core] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-09-25T12:01:18.937-05:00  INFO 8489 --- [core] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-09-25T12:01:19.183-05:00  INFO 8489 --- [core] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-09-25T12:01:19.787-05:00  INFO 8489 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ProducerTaskExecutor: CoreSize=2, MaxSize=4, QueueCapacity=100, Name=ExtractProducer-
-2025-09-25T12:01:19.792-05:00  INFO 8489 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ConsumerTaskExecutor: CoreSize=4, MaxSize=8, QueueCapacity=100, Name=ExtractConsumer-
-2025-09-25T12:01:20.087-05:00  WARN 8489 --- [core] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-09-25T12:01:20.486-05:00  INFO 8489 --- [core] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2025-09-25T12:01:20.487-05:00  INFO 8489 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2025-09-25T12:01:20.488-05:00  INFO 8489 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
-2025-09-25T12:01:20.507-05:00  INFO 8489 --- [core] [           main] a.c.w.controller.ExtractControllerTest   : Started ExtractControllerTest in 17.448 seconds (process running for 18.301)
+2025-09-25T14:32:00.614-05:00  INFO 11089 --- [core] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-25T14:32:06.223-05:00  INFO 11089 --- [core] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-25T14:32:06.470-05:00  INFO 11089 --- [core] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-25T14:32:07.062-05:00  INFO 11089 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ProducerTaskExecutor: CoreSize=2, MaxSize=4, QueueCapacity=100, Name=ExtractProducer-
+2025-09-25T14:32:07.068-05:00  INFO 11089 --- [core] [           main] a.core.web.configuration.AsyncConfig     : [CONF] - Configurando ConsumerTaskExecutor: CoreSize=4, MaxSize=8, QueueCapacity=100, Name=ExtractConsumer-
+2025-09-25T14:32:07.382-05:00  WARN 11089 --- [core] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-25T14:32:07.782-05:00  INFO 11089 --- [core] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2025-09-25T14:32:07.782-05:00  INFO 11089 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2025-09-25T14:32:07.783-05:00  INFO 11089 --- [core] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2025-09-25T14:32:07.801-05:00  INFO 11089 --- [core] [           main] a.c.w.controller.ExtractControllerTest   : Started ExtractControllerTest in 15.495 seconds (process running for 16.337)
 ]]></system-out>
     <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
 WARNING: A Java agent has been loaded dynamically (/Users/nicolassanchez/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar)
@@ -126,16 +126,17 @@ WARNING: If a serviceability tool is not in use, please run with -Djdk.instrumen
 WARNING: Dynamic loading of agents will be disallowed by default in a future release
 ]]></system-err>
   </testcase>
-  <testcase name="shouldGenerateExtracts" classname="avvillas.core.web.controller.ExtractControllerTest" time="0.022">
-    <failure message="Status expected:&lt;201&gt; but was:&lt;500&gt;" type="java.lang.AssertionError"><![CDATA[java.lang.AssertionError: Status expected:<201> but was:<500>
-	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
-	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
-	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:640)
+  <testcase name="shouldGenerateExtracts" classname="avvillas.core.web.controller.ExtractControllerTest" time="0.024">
+    <failure message="No value at JSON path &quot;$.data.productId&quot;" type="java.lang.AssertionError"><![CDATA[java.lang.AssertionError: No value at JSON path "$.data.productId"
+	at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:351)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:148)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:112)
 	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
-	at avvillas.core.web.controller.ExtractControllerTest.shouldGenerateExtracts(ExtractControllerTest.java:75)
+	at avvillas.core.web.controller.ExtractControllerTest.shouldGenerateExtracts(ExtractControllerTest.java:77)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: com.jayway.jsonpath.PathNotFoundException: Expected to find an object with property ['productId'] in path $['data'] but found 'null'. This is not a json object according to the JsonProvider: 'com.jayway.jsonpath.spi.json.JsonSmartJsonProvider'.
 ]]></failure>
     <system-out><![CDATA[
 MockHttpServletRequest:
@@ -155,7 +156,7 @@ Async:
      Async result = null
 
 Resolved Exception:
-             Type = java.lang.NullPointerException
+             Type = null
 
 ModelAndView:
         View name = null
@@ -166,11 +167,11 @@ FlashMap:
        Attributes = null
 
 MockHttpServletResponse:
-           Status = 500
+           Status = 201
     Error message = null
           Headers = [Vary:"Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers", Content-Type:"application/json", X-Content-Type-Options:"nosniff", X-XSS-Protection:"0", Cache-Control:"no-cache, no-store, max-age=0, must-revalidate", Pragma:"no-cache", Expires:"0", X-Frame-Options:"DENY"]
      Content type = application/json
-             Body = {"data":null,"message":["Cannot invoke \"org.springframework.security.core.Authentication.getName()\" because \"authentication\" is null"],"service":"CORE","logEntries":null}
+             Body = {"data":null,"message":["Proceso de generación de extractos activado"],"service":"CORE","logEntries":null}
     Forwarded URL = null
    Redirected URL = null
           Cookies = []
