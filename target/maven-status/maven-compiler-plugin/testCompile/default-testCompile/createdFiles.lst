@@ -1,3 +1,4 @@
-avvillas/core/CoreApplicationTests.class
 avvillas/core/service/implementations/extract_generation_impl/PdfGenerationServiceImplTest.class
+avvillas/core/web/traits/LoaderTraitTest.class
+avvillas/core/CoreApplicationTests.class
 avvillas/core/web/traits/FormatTraitTest.class
