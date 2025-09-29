@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SelectSearch } from './SelectSearch';
 
 jest.mock('@components/icon', () => ({
@@ -6,6 +7,21 @@ jest.mock('@components/icon', () => ({
 }));
 
 jest.mock('@components/form', () => ({ ENTER: 'Enter' }));
+
+// Mock useOutsideClick hook
+// Store the last callback in a variable that can be accessed by tests
+let lastOutsideClickCallback: (() => void) | null = null;
+
+jest.mock('@hooks/useOutsideClick', () => ({
+  useOutsideClick: (callback: () => void) => {
+    // Store the callback in the variable for tests to access
+    lastOutsideClickCallback = callback;
+    const ref = { current: document.createElement('div') };
+    return ref;
+  },
+  // Expose the callback for tests
+  __getLastCallback: () => lastOutsideClickCallback,
+}));
 
 describe('SelectSearch', () => {
   const options = [
@@ -92,5 +108,125 @@ describe('SelectSearch', () => {
       { id: '1', value: '1', label: 'Uno' },
       'sel'
     );
+  });
+
+  it('muestra el valor seleccionado cuando se proporciona un value', () => {
+    render(
+      <SelectSearch
+        label="Selección"
+        value='2'
+        options={options as any}
+        onChangeOption={jest.fn()}
+        name="seleccion"
+      />
+    );
+
+    // Debería mostrar el label de la opción con id='2'
+    expect(screen.getByText('Dos')).toBeInTheDocument();
+  });
+
+  it('aplica clases de error cuando error=true', () => {
+    render(
+      <SelectSearch
+        label="Con Error"
+        value=''
+        options={options as any}
+        onChangeOption={jest.fn()}
+        placeholder="Selecciona"
+        error={true}
+      />
+    );
+
+    // Verificar que la clase de error está aplicada
+    const container = screen.getByText('Selecciona').parentElement;
+    expect(container).toHaveClass('border-red-error');
+  });
+
+  it('cierra el dropdown cuando se hace click fuera', async () => {
+    render(
+      <SelectSearch
+        value=''
+        options={options as any}
+        onChangeOption={jest.fn()}
+        placeholder="Click fuera"
+      />
+    );
+
+    // Abrir el dropdown
+    fireEvent.click(screen.getByText('Click fuera'));
+
+    // Verificar que el dropdown está abierto
+    expect(screen.getByText('Uno')).toBeInTheDocument();
+
+    // Simular click fuera llamando al callback del hook mockeado
+    const mockHook = jest.requireMock('@hooks/useOutsideClick');
+    const callback = mockHook.__getLastCallback();
+    if (callback) callback();
+
+    // Verificar que el dropdown está cerrado
+    expect(screen.queryByText('Uno')).not.toBeInTheDocument();
+  });
+
+  it('muestra "No se encontraron resultados" cuando no hay coincidencias', async () => {
+    const user = userEvent.setup();
+    render(
+      <SelectSearch
+        value=''
+        options={options as any}
+        onChangeOption={jest.fn()}
+        placeholder="Buscar"
+      />
+    );
+
+    // Abrir el dropdown
+    await user.click(screen.getByText('Buscar'));
+
+    // Buscar algo que no existe
+    const input = screen.getByRole('textbox');
+    await user.type(input, 'xyz');
+
+    // Verificar mensaje de no resultados
+    expect(screen.getByText('No se encontraron resultados')).toBeInTheDocument();
+  });
+
+  it('maneja correctamente un array de opciones vacío', () => {
+    render(
+      <SelectSearch
+        value=''
+        options={[]}
+        onChangeOption={jest.fn()}
+        placeholder="Sin opciones"
+      />
+    );
+
+    // Abrir el dropdown
+    fireEvent.click(screen.getByText('Sin opciones'));
+
+    // Verificar mensaje de no resultados
+    expect(screen.getByText('No se encontraron resultados')).toBeInTheDocument();
+  });
+
+  it('aplica las clases CSS personalizadas correctamente', () => {
+    render(
+      <SelectSearch
+        value=''
+        options={options as any}
+        onChangeOption={jest.fn()}
+        placeholder="Clases"
+        inputClassName="test-input"
+        labelClassName="test-label"
+        wrapperClassName="test-wrapper"
+        containerClassName="test-container"
+        iconClassName="test-icon"
+        label="Etiqueta"
+      />
+    );
+
+    // Verificar clases aplicadas
+    expect(screen.getByText('Etiqueta')).toHaveClass('test-label');
+    expect(screen.getByText('Clases')).toHaveClass('test-input');
+    expect(screen.getByText('Clases').parentElement).toHaveClass('test-container');
+    expect(screen.getByTestId('icon')).toHaveClass('test-icon');
+    expect(screen.getByText('Etiqueta').parentElement?.parentElement).toHaveClass('test-wrapper');
   });
 });

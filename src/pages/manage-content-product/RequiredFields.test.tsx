@@ -200,4 +200,26 @@ describe('RequiredFields', () => {
     fireEvent.keyDown(add, { key: 'Enter' });
     expect(onAddField).toHaveBeenCalledTimes(2);
   });
+
+  it('muestra error cuando sendModal es true y getSelectedOption no encuentra un valor válido', () => {
+    const updateField = jest.fn();
+
+    // Crear un campo con un inputProductStructureId que no existe en las opciones
+    const fields = [
+      { id: 'f1', isFixed: false, content: null, inputProductStructureId: 'id_inexistente' },
+    ];
+
+    render(
+      <RequiredFields
+        sendModal={true}
+        fields={fields}
+        updateField={updateField}
+        onAddField={jest.fn()}
+        options={baseOptions}
+      />
+    );
+
+    // Verificar que se muestra el error para el SelectSearch
+    expect(screen.getByTestId('err-sel-Campos requeridos')).toBeInTheDocument();
+  });
 });

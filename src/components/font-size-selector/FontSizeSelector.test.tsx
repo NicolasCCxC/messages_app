@@ -1,9 +1,10 @@
 jest.unmock('@components/font-size-selector');
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FontSizeSelector } from './FontSizeSelector';
 import { IOption } from '.';
+import { ENTER } from '@components/form';
 
 const mockOptions: IOption[] = [
     { id: '1', value: 10, label: '10px' },
@@ -47,10 +48,10 @@ describe('FontSizeSelector Component', () => {
         const user = userEvent.setup();
         render(<FontSizeSelector options={mockOptions} onChangeOption={mockOnChange} value="" />);
         const combobox = screen.getByRole('button');
-        
+
         await user.click(combobox);
         expect(screen.getByPlaceholderText('Buscar...')).toBeInTheDocument();
-        
+
         await user.click(combobox);
         expect(screen.queryByPlaceholderText('Buscar...')).not.toBeInTheDocument();
     });
@@ -59,9 +60,9 @@ describe('FontSizeSelector Component', () => {
         const user = userEvent.setup();
         render(<FontSizeSelector name="fontSize" options={mockOptions} onChangeOption={mockOnChange} value="" />);
         await user.click(screen.getByRole('button'));
-        
+
         await user.click(screen.getByText('16px'));
-        
+
         expect(mockOnChange).toHaveBeenCalledWith(mockOptions[2], 'fontSize');
     });
 
@@ -82,10 +83,10 @@ describe('FontSizeSelector Component', () => {
         render(<FontSizeSelector name="fontSize" options={mockOptions} onChangeOption={mockOnChange} value="" />);
         await user.click(screen.getByRole('button'));
         const searchInput = screen.getByPlaceholderText('Buscar...');
-        
+
         await user.type(searchInput, '20');
         await user.keyboard('{Enter}');
-        
+
         expect(mockOnChange).toHaveBeenCalledWith({ value: 20, label: '20' }, 'fontSize');
     });
 
@@ -94,10 +95,72 @@ describe('FontSizeSelector Component', () => {
         render(<FontSizeSelector name="fontSize" options={mockOptions} onChangeOption={mockOnChange} value="" />);
         await user.click(screen.getByRole('button'));
         const searchInput = screen.getByPlaceholderText('Buscar...');
-        
+
         await user.type(searchInput, '12PX');
         await user.keyboard('{Enter}');
 
         expect(mockOnChange).toHaveBeenCalledWith(mockOptions[1], 'fontSize');
+    });
+    it('debería seleccionar una opción al presionar Enter cuando está enfocada', async () => {
+        const user = userEvent.setup();
+        render(<FontSizeSelector name="fontSize" options={mockOptions} onChangeOption={mockOnChange} value="" />);
+
+        // Abrir el dropdown
+        await user.click(screen.getByRole('button'));
+
+        // Encontrar la opción y enfocarla
+        const option = screen.getByText('16px');
+        option.focus();
+
+        // Simular presionar Enter
+        await user.keyboard('{Enter}');
+
+        // Verificar que se llamó a onChangeOption con la opción correcta
+        expect(mockOnChange).toHaveBeenCalledWith(mockOptions[2], 'fontSize');
+    });
+
+    it('no debería seleccionar una opción al presionar teclas diferentes a Enter', async () => {
+        const user = userEvent.setup();
+        render(<FontSizeSelector name="fontSize" options={mockOptions} onChangeOption={mockOnChange} value="" />);
+
+        // Abrir el dropdown
+        await user.click(screen.getByRole('button'));
+
+        // Encontrar la opción y enfocarla
+        const option = screen.getByText('16px');
+        option.focus();
+
+        // Simular presionar Space
+        await user.keyboard(' ');
+
+        // Verificar que no se llamó a onChangeOption
+        expect(mockOnChange).not.toHaveBeenCalled();
+
+        // Simular presionar Tab
+        await user.keyboard('{Tab}');
+
+        // Verificar que no se llamó a onChangeOption
+        expect(mockOnChange).not.toHaveBeenCalled();
+    });
+
+    it('debería llamar a handleSelectOption cuando se presiona Enter en el onKeyDown del elemento de la lista', () => {
+        render(<FontSizeSelector name="fontSize" options={mockOptions} onChangeOption={mockOnChange} value="" />);
+
+        // Abrir el dropdown
+        fireEvent.click(screen.getByRole('button'));
+
+        // Encontrar el elemento de la lista (li) que contiene la opción
+        const listItem = screen.getByText('16px').closest('li');
+
+        // Verificar que el elemento existe antes de simular el evento
+        if (listItem) {
+            // Simular directamente el evento onKeyDown con la tecla Enter
+            fireEvent.keyDown(listItem, { key: ENTER });
+        } else {
+            throw new Error('List item element not found');
+        }
+
+        // Verificar que se llamó a onChangeOption con la opción correcta
+        expect(mockOnChange).toHaveBeenCalledWith(mockOptions[2], 'fontSize');
     });
 });
