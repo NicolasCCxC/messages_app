@@ -1,0 +1,17 @@
+.login {
+  @apply flex items-center justify-center h-screen;
+
+  &__background {
+      @apply w-full h-screen absolute -z-10 left-0 top-0 bg-cover bg-center bg-no-repeat;
+
+      background-image: url("../../assets/images/ImagenLogin.png");
+  }
+
+  &__form {
+      @apply z-10 p-4 lg:w-[29.125rem] bg-[rgba(217,217,217,0.6)] rounded-lg lg:p-12 w-[21.25rem];
+  }
+
+  &__error {
+      @apply mt-2 text-[#FF0000] text-center text-base lg:text-lg;
+  }
+}

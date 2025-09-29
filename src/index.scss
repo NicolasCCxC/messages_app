@@ -1,0 +1,48 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+$red: #E1001D;
+
+@font-face {
+    font-family: 'Roboto';
+    src: url("/src/assets/fonts/Roboto-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box !important;
+}
+
+td {
+    @apply p-0;
+
+    box-sizing: border-box !important;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+input {
+    @apply outline-none;
+
+    &[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    }
+
+    font-family: 'Arial' !important;
+    font-weight: normal;
+}

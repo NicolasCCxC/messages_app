@@ -1,9 +1,0 @@
-avvillas/core/service/implementations/extract_generation_impl/PdfGenerationServiceImplTest.class
-avvillas/core/web/controller/index_file/IndexFileGetControllerTest.class
-avvillas/core/web/traits/LoaderTraitTest.class
-avvillas/core/web/traits/FormatTraitCatchTest.class
-avvillas/core/CoreApplicationTests.class
-avvillas/core/web/controller/ExtractControllerTest.class
-avvillas/core/web/traits/ProductTraitTest.class
-avvillas/core/web/controller/exception/GlobalExceptionHandlerAdditionalTest.class
-avvillas/core/web/traits/FormatTraitTest.class

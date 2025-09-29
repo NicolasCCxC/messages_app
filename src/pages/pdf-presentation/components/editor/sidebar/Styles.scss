@@ -1,0 +1,74 @@
+.editor {
+    @apply flex flex-col flex-1 min-h-0;
+
+    .sidebar {
+        @apply w-[13.75rem] pt-[3.25rem] pr-2 bg-gray-light border-gray-dark border-r-[0.0313rem] pl-[3rem] relative overflow-auto;
+
+        &__tabs {
+            @apply flex -rotate-90 shadow-md absolute left-3 top-[48%] h-[1.5625rem] w-[13.5rem] rounded-ee-lg rounded-b-lg overflow-hidden;
+
+            transform: translate(-50%, -50%) rotate(-90deg);
+        }
+
+        &__tab {
+            @apply text-sm font-bold bg-white leading-none tracking-tight text-blue-light transition-colors duration-200 ease-out;
+
+            &--active {
+                @apply bg-blue-light text-white;
+            }
+
+            &:nth-child(1),
+            &:nth-child(2) {
+                @apply border-gray-dark border-r-[0.0313rem];
+            }
+        }
+
+        &__toggle-button {
+            @apply fixed top-[44%] z-10 -translate-y-1/2 bg-[#0156A3] w-[1.5625rem] h-[4.9375rem] flex items-center justify-center rounded-tr-lg rounded-br-lg shadow-lg p-1 cursor-pointer transition-all duration-700;
+
+            &--closed {
+                @apply left-0;
+
+                .sidebar__toggle-icon {
+                    @apply rotate-180;
+                }
+            }
+        }
+    }
+
+    .object-panel {
+        @apply h-full overflow-y-auto pb-2;
+
+        &__cards {
+            @apply grid grid-cols-2 gap-0 w-max gap-x-1 gap-y-2;
+        }
+
+        &__card {
+            @apply bg-white w-[4.5625rem] h-[4.5625rem] rounded-lg shadow-card border-gray-dark border-[0.0313rem] flex flex-col gap-1 justify-center items-center px-1 cursor-pointer;
+
+            &-caption {
+                @apply w-full overflow-hidden text-sm  text-center text-black truncate;
+            }
+        }
+
+        &__title {
+            @apply text-gray-dark mb-[0.8125rem];
+        }
+    }
+
+    .fields-panel {
+        @apply flex flex-col flex-1 h-full;
+
+        &__inputs {
+            @apply bg-white w-[9.625rem] border-gray-dark border-[0.0313rem] py-[0.1875rem] border-b-0 flex-1 overflow-y-auto;
+        }
+
+        &__input {
+            @apply text-[0.8125rem] text-gray-dark border text-center border-gray-dark bg-gray-light border-b-0 py-1 px-2.5 leading-[0.8125rem];
+
+            &:last-child {
+                @apply border border-b-gray-dark;
+            }
+        }
+    }
+}

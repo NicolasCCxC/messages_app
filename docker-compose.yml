@@ -1,69 +1,25 @@
 services:
-  core-avvillas:
-    image: core-avvillas-img
-    build: .
-    command: java -jar /app/target/core-1.0.jar
-    container_name: core-avvillas
-    environment:
-      DB_HOST: ${DB_HOST}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_EMAIL: ${SMTP_EMAIL}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      URL_GATEWAY: ${URL_GATEWAY}
-      PROCESSING_TIME: ${PROCESSING_TIME}
-      PDF_GENERATION_TIME: ${PDF_GENERATION_TIME}
-      # ======================================================================
-      # 2. CONFIGURACION DE RENDIMIENTO
-      # Estos son los parametros mas importantes para ajustar la velocidad y el
-      # consumo de recursos de la aplicacion.
-      # ======================================================================
-      # --Parametros Generales ---
-      # Capacidad de la cola en memoria entre el productor (lectura de BD) y los
-      # consumidores (generacion de PDF). Una cola mas grande puede suavizar picos
-      # de carga, pero consume mas RAM.
-      EXTRACT_PERFORMANCE_QUEUE_CAPACITY: ${EXTRACT_PERFORMANCE_QUEUE_CAPACITY}
-      # Tamano del lote de PDFs que cada hilo consumidor acumula en memoria antes de
-      # escribirlos todos juntos al disco. Un lote mas grande puede mejorar el
-      # rendimiento de I/O de disco, pero usa mas RAM.
-      EXTRACT_PERFORMANCE_PDF_WRITE_BATCH_SIZE: ${EXTRACT_PERFORMANCE_PDF_WRITE_BATCH_SIZE}
-      # --Pool de Hilos del Productor (Lectura de BD) ---
-      # Tareas intensivas en I/O (esperan por la red y la BD).
-      # Un numero mayor de hilos aqui puede acelerar la lectura si la BD responde rapido.
-      EXTRACT_PERFORMANCE_PRODUCER_POOL_CORE_SIZE: ${EXTRACT_PERFORMANCE_PRODUCER_POOL_CORE_SIZE}
-      EXTRACT_PERFORMANCE_PRODUCER_POOL_MAX_SIZE: ${EXTRACT_PERFORMANCE_PRODUCER_POOL_MAX_SIZE}
-      # Tamano del lote de IDs a leer de la BD en cada consulta paginada.
-      # Un valor mas alto reduce el numero de consultas, pero aumenta la carga por consulta.
-      EXTRACT_PERFORMANCE_PRODUCER_POOL_ID_BATCH_SIZE: ${EXTRACT_PERFORMANCE_PRODUCER_POOL_ID_BATCH_SIZE}
-      # --Pool de Hilos del Consumidor (Generacion de PDF) ---
-      # Tareas intensivas en CPU (parseo de HTML, renderizado de PDF).
-      # RECOMENDACION: max-size deberia ser cercano al numero de nucleos de la CPU.
-      # Ejemplo: Para una CPU de 8 nucleos, un valor entre 8 y 12 es optimo.
-      EXTRACT_PERFORMANCE_CONSUMER_POOL_CORE_SIZE: ${EXTRACT_PERFORMANCE_CONSUMER_POOL_CORE_SIZE}
-      EXTRACT_PERFORMANCE_CONSUMER_POOL_MAX_SIZE: ${EXTRACT_PERFORMANCE_CONSUMER_POOL_MAX_SIZE}
-      EXTRACT_PERFORMANCE_CONSUMER_POOL_QUEUE_CAPACITY: ${EXTRACT_PERFORMANCE_CONSUMER_POOL_QUEUE_CAPACITY}
-      # ======================================================================
-      # 3. CONFIGURACION DEL POOL DE CONEXIONES (HIKARI)
-      # Ajusta esto en relacion a los pools de hilos para evitar bloqueos.
-      # REGLA: MAX_POOL_SIZE >= (PRODUCER_MAX_SIZE + CONSUMER_MAX_SIZE)
-      # ======================================================================
-      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE}
-      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE}
-      # ======================================================================
-      # 4. CONFIGURACION DE LOGGING
-      # Util para depurar sin necesidad de reconstruir la imagen.
-      # Cambia a DEBUG para ver mas detalles o a WARN para menos.
-      # ======================================================================
-      LOGGING_LEVEL_COM_OPENHTMLTOPDF: ${LOGGING_LEVEL_COM_OPENHTMLTOPDF}
-      LOGGING_LEVEL_AVVILLAS_CORE: ${LOGGING_LEVEL_AVVILLAS_CORE}
-    volumes:
-      - /home/forge:/home/forge
-      - /home/forge/core-av/logs:/app/logs
-    ports:
-      - "8087:8087"
-    networks:
-      - avvillas-network
+  # Service for up docker in dev mode with live refresh
+  #frontend-avvillas-dev:
+  #  image: frontend-avvillas-dev-img
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfile.dev
+  #  volumes:
+  #    - .:/app
+  #    - /app/node_modules
+  #  ports:
+  #    - "5173:5173"
+  #  container_name: frontend-avvillas-dev
+  #  environment:
+  #    - CHOKIDAR_USEPOLLING=true
 
-networks:
-  avvillas-network:
-    external: true
+  # Service for up docker in prod mode with NGINX
+  frontend-avvillas:
+    image: frontend-avvillas-img
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "3000:80"
+    container_name: frontend-avvillas
