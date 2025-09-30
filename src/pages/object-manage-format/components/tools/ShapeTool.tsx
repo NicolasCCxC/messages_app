@@ -10,25 +10,8 @@ import ColorPicker from './ColorPicker';
 export const ShapeTool: React.FC = () => {
     const { element, updateElementStyles } = useContext(ManageObjectContext);
 
-    const handleChangeStyle = ({ target: { value } }: ChangeEvent, styleValue: keyof React.CSSProperties): void => {
-        // For color inputs, we need to handle them specially to match test expectations
-        if (styleValue === 'backgroundColor' || styleValue === 'borderColor') {
-            // In the test, ColorPicker is mocked as a text input that triggers onChange for each keystroke
-            // We need to validate that the value is a valid hex color before passing it to updateElementStyles
-            // The test expects updateElementStyles to be called with '#FF0000' after typing is complete
-
-            // Only update when we have a complete valid hex color (#RRGGBB)
-            if (/^#[0-9A-F]{6}$/i.test(value)) {
-                updateElementStyles(styleValue, value);
-            }
-        } else {
-            // For border radius inputs, ensure they are passed as strings
-            // When typing in the input, the value might come in as individual characters
-            // We need to ensure we're passing the complete value to updateElementStyles
-            const finalValue = value.replace(/^0+(\d)/, '$1'); // Remove leading zeros except for "0" itself
-            updateElementStyles(styleValue, finalValue);
-        }
-    };
+    const handleChangeStyle = ({ target: { value } }: ChangeEvent, styleValue: keyof React.CSSProperties): void =>
+        updateElementStyles(styleValue, value);
 
     return (
         <div>
@@ -46,12 +29,12 @@ export const ShapeTool: React.FC = () => {
                     >
                         <Icon name={iconName} />
                         <input
-                            type="text"
+                            type="number"
                             placeholder={PLACEHOLDERS.shapeStyle}
                             className="w-4 h-4 ml-2 text-sm text-black"
                             name={styleValue}
                             onChange={e => handleChangeStyle(e, styleValue)}
-                            value={String(element?.style?.[styleValue] ?? '')}
+                            value={element?.style?.[styleValue] ?? ''}
                         />
                     </div>
                 ))}

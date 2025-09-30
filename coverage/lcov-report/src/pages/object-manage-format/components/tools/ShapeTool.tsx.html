@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95.23% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>20/21</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">76.92% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>20/26</span>
+                <span class='fraction'>15/20</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>19/20</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -108,24 +108,7 @@
 <a name='L43'></a><a href='#L43'>43</a>
 <a name='L44'></a><a href='#L44'>44</a>
 <a name='L45'></a><a href='#L45'>45</a>
-<a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a>
-<a name='L49'></a><a href='#L49'>49</a>
-<a name='L50'></a><a href='#L50'>50</a>
-<a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a>
-<a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a>
-<a name='L55'></a><a href='#L55'>55</a>
-<a name='L56'></a><a href='#L56'>56</a>
-<a name='L57'></a><a href='#L57'>57</a>
-<a name='L58'></a><a href='#L58'>58</a>
-<a name='L59'></a><a href='#L59'>59</a>
-<a name='L60'></a><a href='#L60'>60</a>
-<a name='L61'></a><a href='#L61'>61</a>
-<a name='L62'></a><a href='#L62'>62</a>
-<a name='L63'></a><a href='#L63'>63</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
+<a name='L46'></a><a href='#L46'>46</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
@@ -138,32 +121,15 @@
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">23x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">28x</span>
@@ -177,7 +143,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -199,25 +165,8 @@ import ColorPicker from './ColorPicker';
 export const ShapeTool: React.FC = () =&gt; {
     const { element, updateElementStyles } = useContext(ManageObjectContext);
 &nbsp;
-    const handleChangeStyle = ({ target: { value } }: ChangeEvent, styleValue: keyof React.CSSProperties): void =&gt; {
-        // For color inputs, we need to handle them specially to match test expectations
-        if (styleValue === 'backgroundColor' || styleValue === 'borderColor') {
-            // In the test, ColorPicker is mocked as a text input that triggers onChange for each keystroke
-            // We need to validate that the value is a valid hex color before passing it to updateElementStyles
-            // The test expects updateElementStyles to be called with '#FF0000' after typing is complete
-&nbsp;
-            // Only update when we have a complete valid hex color (#RRGGBB)
-            <span class="missing-if-branch" title="if path not taken" >I</span>if (/^#[0-9A-F]{6}$/i.test(value)) {
-<span class="cstat-no" title="statement not covered" >                updateElementStyles(styleValue, value);</span>
-            }
-        } else {
-            // For border radius inputs, ensure they are passed as strings
-            // When typing in the input, the value might come in as individual characters
-            // We need to ensure we're passing the complete value to updateElementStyles
-            const finalValue = value.replace(/^0+(\d)/, '$1'); // Remove leading zeros except for "0" itself
-            updateElementStyles(styleValue, finalValue);
-        }
-    };
+    const handleChangeStyle = ({ target: { value } }: ChangeEvent, styleValue: keyof React.CSSProperties): void =&gt;
+        updateElementStyles(styleValue, value);
 &nbsp;
     return (
         &lt;div&gt;
@@ -235,12 +184,12 @@ export const ShapeTool: React.FC = () =&gt; {
                     &gt;
                         &lt;Icon name={iconName} /&gt;
                         &lt;input
-                            type="text"
+                            type="number"
                             placeholder={PLACEHOLDERS.shapeStyle}
                             className="w-4 h-4 ml-2 text-sm text-black"
                             name={styleValue}
                             onChange={e =&gt; handleChangeStyle(e, styleValue)}
-                            value={String(element<span class="branch-0 cbranch-no" title="branch not covered" >?.s</span>tyle<span class="branch-0 cbranch-no" title="branch not covered" >?.[s</span>tyleValue] ?? <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>}
+                            value={element<span class="branch-0 cbranch-no" title="branch not covered" >?.s</span>tyle<span class="branch-0 cbranch-no" title="branch not covered" >?.[s</span>tyleValue] ?? <span class="branch-1 cbranch-no" title="branch not covered" >''}</span>
                         /&gt;
                     &lt;/div&gt;
                 ))}
@@ -256,7 +205,7 @@ export const ShapeTool: React.FC = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-30T15:18:38.846Z
+                at 2025-09-30T15:32:47.371Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShapeTool } from './ShapeTool';
 import { ManageObjectContext, IElement } from '@pages/object-manage-format/context';
@@ -6,22 +6,21 @@ import type { ContextType } from 'react';
 import { ObjectType } from '@constants/ObjectsEditor';
 import { SHAPE_STYLE_TOOLS } from '.';
 
-// Mock the ColorPicker component
-jest.mock('./ColorPicker', () => jest.fn(({ onChange, value }) => (
-    <input
-        data-testid="mock-color-picker"
-        type="text"
-        value={value || ''}
-        onChange={e => onChange({ target: { value: e.target.value } })}
-    />
-)));
+jest.mock('./ColorPicker', () =>
+    jest.fn(({ onChange, value }) => (
+        <input
+            data-testid="mock-color-picker"
+            type="text"
+            value={value || ''}
+            onChange={e => onChange({ target: { value: e.target.value } })}
+        />
+    ))
+);
 
-// Mock the SizeControls component
 jest.mock('./SizeControls', () => ({
     SizeControls: jest.fn(() => <div data-testid="mock-size-controls">SizeControls</div>),
 }));
 
-// Mock the Icon component
 jest.mock('@components/icon', () => ({
     Icon: jest.fn(({ name }) => <div data-testid={`icon-${name}`}>{name}</div>),
 }));
@@ -70,22 +69,17 @@ describe('ShapeTool Component', () => {
     it('debería renderizar correctamente con todos los controles', () => {
         renderShapeTool();
 
-        // Verify background color section is rendered
         expect(screen.getByText('Fondo')).toBeInTheDocument();
         expect(screen.getByText('Color')).toBeInTheDocument();
 
-        // Verify border color section is rendered
         expect(screen.getByText('Color de borde')).toBeInTheDocument();
 
-        // Verify border radius section is rendered
         expect(screen.getByText('Borde redondo')).toBeInTheDocument();
 
-        // Verify all border radius controls are rendered
         SHAPE_STYLE_TOOLS.forEach(({ iconName }) => {
             expect(screen.getByTestId(`icon-${iconName}`)).toBeInTheDocument();
         });
 
-        // Verify size controls are rendered
         expect(screen.getByTestId('mock-size-controls')).toBeInTheDocument();
     });
 
@@ -98,6 +92,10 @@ describe('ShapeTool Component', () => {
 
         await user.clear(backgroundColorPicker);
         await user.type(backgroundColorPicker, '#FF0000');
+
+        fireEvent.change(backgroundColorPicker, {
+            target: { value: '#FF0000' },
+        });
 
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('backgroundColor', '#FF0000');
     });
@@ -112,6 +110,10 @@ describe('ShapeTool Component', () => {
         await user.clear(borderColorPicker);
         await user.type(borderColorPicker, '#00FF00');
 
+        fireEvent.change(borderColorPicker, {
+            target: { value: '#00FF00' },
+        });
+
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('borderColor', '#00FF00');
     });
 
@@ -119,12 +121,14 @@ describe('ShapeTool Component', () => {
         const user = userEvent.setup();
         renderShapeTool();
 
-        // Get all number inputs for border radius
         const borderRadiusInputs = screen.getAllByPlaceholderText('0');
 
-        // Test the first border radius input (top left)
         await user.clear(borderRadiusInputs[0]);
         await user.type(borderRadiusInputs[0], '10');
+
+        fireEvent.change(borderRadiusInputs[0], {
+            target: { value: '10' },
+        });
 
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('borderTopLeftRadius', '10');
     });
@@ -133,23 +137,30 @@ describe('ShapeTool Component', () => {
         const user = userEvent.setup();
         renderShapeTool();
 
-        // Get all number inputs for border radius
         const borderRadiusInputs = screen.getAllByPlaceholderText('0');
 
-        // Test all border radius inputs
-        // Top right
         await user.clear(borderRadiusInputs[1]);
         await user.type(borderRadiusInputs[1], '20');
+        fireEvent.change(borderRadiusInputs[1], {
+            target: { value: '20' },
+        });
+
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('borderTopRightRadius', '20');
 
-        // Bottom left
         await user.clear(borderRadiusInputs[2]);
         await user.type(borderRadiusInputs[2], '30');
+        fireEvent.change(borderRadiusInputs[2], {
+            target: { value: '30' },
+        });
+
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('borderBottomLeftRadius', '30');
 
-        // Bottom right
         await user.clear(borderRadiusInputs[3]);
         await user.type(borderRadiusInputs[3], '40');
+        fireEvent.change(borderRadiusInputs[3], {
+            target: { value: '40' },
+        });
+
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('borderBottomRightRadius', '40');
     });
 
@@ -159,7 +170,6 @@ describe('ShapeTool Component', () => {
 
         const borderRadiusInputs = screen.getAllByPlaceholderText('0');
 
-        // Clear the input and check that the value is set to empty string
         await user.clear(borderRadiusInputs[0]);
 
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('borderTopLeftRadius', '');
@@ -186,9 +196,9 @@ describe('ShapeTool Component', () => {
         expect(colorPickers[1]).toHaveValue('#00FF00');
 
         const borderRadiusInputs = screen.getAllByPlaceholderText('0');
-        expect(borderRadiusInputs[0]).toHaveValue('10');
-        expect(borderRadiusInputs[1]).toHaveValue('20');
-        expect(borderRadiusInputs[2]).toHaveValue('30');
-        expect(borderRadiusInputs[3]).toHaveValue('40');
+        expect(borderRadiusInputs[0]).toHaveValue(10);
+        expect(borderRadiusInputs[1]).toHaveValue(20);
+        expect(borderRadiusInputs[2]).toHaveValue(30);
+        expect(borderRadiusInputs[3]).toHaveValue(40);
     });
 });

@@ -1,9 +1,9 @@
+import { ObjectType } from '@constants/ObjectsEditor';
+import { IElement, ManageObjectContext } from '@pages/object-manage-format/context';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TextTool } from './TextTool';
-import { ManageObjectContext, IElement } from '@pages/object-manage-format/context';
 import type { ContextType } from 'react';
-import { ObjectType } from '@constants/ObjectsEditor';
+import { TextTool } from './TextTool';
 
 jest.mock('@components/font-size-selector', () => ({
     FontSizeSelector: jest.fn(({ onChangeOption }) => (
@@ -55,7 +55,7 @@ describe('TextTool Component', () => {
     it('debería llamar a updateElementStyles al cambiar la alineación del texto', async () => {
         const user = userEvent.setup();
         renderTextTool(baseElement);
-
+        
         const alignContainer = screen.getByText('Alineación').parentElement!;
         const alignButtons = within(alignContainer).getAllByRole('button');
         await user.click(alignButtons[1]);
@@ -66,10 +66,10 @@ describe('TextTool Component', () => {
     it('debería llamar a updateElementStyles al cambiar el estilo del texto (ej. negrita)', async () => {
         const user = userEvent.setup();
         renderTextTool(baseElement);
-
+        
         const styleContainer = screen.getByText('Estilos').parentElement!;
         const styleButtons = within(styleContainer).getAllByRole('button');
-
+        
         await user.click(styleButtons[0]);
 
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('fontWeight', 'bold');
@@ -83,9 +83,9 @@ describe('TextTool Component', () => {
             const listContainer = screen.getByText('Lista').parentElement!;
             const listButtons = within(listContainer).getAllByRole('button');
             const bulletListButton = listButtons[0];
-
+            
             await user.click(bulletListButton);
-
+            
             expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• Linea 1\n• Linea 2');
         });
 
@@ -95,7 +95,7 @@ describe('TextTool Component', () => {
 
             const listContainer = screen.getByText('Lista').parentElement!;
             const bulletListButton = within(listContainer).getAllByRole('button')[0];
-
+            
             await user.click(bulletListButton);
             expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• Texto Original');
 
@@ -140,7 +140,7 @@ describe('TextTool Component', () => {
 
             expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• ');
         });
-
+        
         it('debería llamar a updateElementStyles al cambiar el tamaño de la fuente', async () => {
             const user = userEvent.setup();
             renderTextTool(baseElement);
@@ -148,7 +148,7 @@ describe('TextTool Component', () => {
             await user.click(fontSizeButton);
             expect(mockUpdateElementStyles).toHaveBeenCalledWith('fontSize', 16);
         });
-
+        
         it('debería llamar a updateElementStyles al cambiar el color del texto', async () => {
             const user = userEvent.setup();
             renderTextTool(baseElement);
