@@ -220,4 +220,36 @@ describe('RequiredFields', () => {
 
     expect(screen.getByTestId('err-sel-Campos requeridos')).toBeInTheDocument();
   });
+
+  it('maneja correctamente field.content nulo o indefinido usando valor vacío como fallback', () => {
+    const updateField = jest.fn();
+
+    // Crear campos con content null y undefined
+    const fields: any[] = [
+      { id: 'f1', isFixed: true, content: null, inputProductStructureId: null },
+      { id: 'f2', isFixed: true, content: undefined, inputProductStructureId: null },
+    ];
+
+    render(
+      <RequiredFields
+        sendModal={false}
+        fields={fields}
+        updateField={updateField}
+        onAddField={jest.fn()}
+        options={baseOptions}
+      />
+    );
+
+    // Obtener todos los inputs de texto
+    const inputs = screen.getAllByRole('textbox');
+
+    // Verificar que ambos inputs tienen valor vacío (no null o undefined)
+    inputs.forEach(input => {
+      expect(input).toHaveValue('');
+    });
+
+    // Cambiar el valor de uno de los inputs y verificar que updateField es llamado correctamente
+    fireEvent.change(inputs[0], { target: { value: 'Nuevo valor' } });
+    expect(updateField).toHaveBeenCalledWith(0, { content: 'Nuevo valor' });
+  });
 });
