@@ -55,7 +55,7 @@ describe('TextTool Component', () => {
     it('debería llamar a updateElementStyles al cambiar la alineación del texto', async () => {
         const user = userEvent.setup();
         renderTextTool(baseElement);
-        
+
         const alignContainer = screen.getByText('Alineación').parentElement!;
         const alignButtons = within(alignContainer).getAllByRole('button');
         await user.click(alignButtons[1]);
@@ -66,10 +66,10 @@ describe('TextTool Component', () => {
     it('debería llamar a updateElementStyles al cambiar el estilo del texto (ej. negrita)', async () => {
         const user = userEvent.setup();
         renderTextTool(baseElement);
-        
+
         const styleContainer = screen.getByText('Estilos').parentElement!;
         const styleButtons = within(styleContainer).getAllByRole('button');
-        
+
         await user.click(styleButtons[0]);
 
         expect(mockUpdateElementStyles).toHaveBeenCalledWith('fontWeight', 'bold');
@@ -83,9 +83,9 @@ describe('TextTool Component', () => {
             const listContainer = screen.getByText('Lista').parentElement!;
             const listButtons = within(listContainer).getAllByRole('button');
             const bulletListButton = listButtons[0];
-            
+
             await user.click(bulletListButton);
-            
+
             expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• Linea 1\n• Linea 2');
         });
 
@@ -95,7 +95,7 @@ describe('TextTool Component', () => {
 
             const listContainer = screen.getByText('Lista').parentElement!;
             const bulletListButton = within(listContainer).getAllByRole('button')[0];
-            
+
             await user.click(bulletListButton);
             expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• Texto Original');
 
@@ -114,7 +114,33 @@ describe('TextTool Component', () => {
 
             expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', 'Texto Original');
         });
-        
+
+        it('debería convertir una lista numerada a una lista de viñetas', async () => {
+            const user = userEvent.setup();
+            renderTextTool({ ...baseElement, content: '1. Linea 1\n2. Linea 2' });
+
+            const listContainer = screen.getByText('Lista').parentElement!;
+            const listButtons = within(listContainer).getAllByRole('button');
+            const bulletListButton = listButtons[0];
+
+            await user.click(bulletListButton);
+
+            expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• Linea 1\n• Linea 2');
+        });
+
+        it('debería manejar correctamente el contenido vacío', async () => {
+            const user = userEvent.setup();
+            renderTextTool({ ...baseElement, content: '' });
+
+            const listContainer = screen.getByText('Lista').parentElement!;
+            const listButtons = within(listContainer).getAllByRole('button');
+            const bulletListButton = listButtons[0];
+
+            await user.click(bulletListButton);
+
+            expect(mockUpdateElementProperties).toHaveBeenCalledWith('content', '• ');
+        });
+
         it('debería llamar a updateElementStyles al cambiar el tamaño de la fuente', async () => {
             const user = userEvent.setup();
             renderTextTool(baseElement);
@@ -122,7 +148,7 @@ describe('TextTool Component', () => {
             await user.click(fontSizeButton);
             expect(mockUpdateElementStyles).toHaveBeenCalledWith('fontSize', 16);
         });
-        
+
         it('debería llamar a updateElementStyles al cambiar el color del texto', async () => {
             const user = userEvent.setup();
             renderTextTool(baseElement);

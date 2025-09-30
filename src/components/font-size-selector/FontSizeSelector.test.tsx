@@ -163,4 +163,21 @@ describe('FontSizeSelector Component', () => {
         // Verificar que se llamó a onChangeOption con la opción correcta
         expect(mockOnChange).toHaveBeenCalledWith(mockOptions[2], 'fontSize');
     });
+
+    it('debería mostrar el valor directamente cuando no coincide con ninguna opción', () => {
+        // Valor que no coincide con ningún ID de las opciones
+        const nonMatchingValue = '4';
+
+        render(
+            <FontSizeSelector
+                label="Font Size"
+                options={mockOptions}
+                value={nonMatchingValue}
+                onChangeOption={mockOnChange}
+            />
+        );
+
+        // Debería mostrar el valor directamente ya que no hay opción con id='4'
+        expect(screen.getByText(nonMatchingValue)).toBeInTheDocument();
+    });
 });
