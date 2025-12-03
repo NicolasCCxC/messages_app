@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProcessStateServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl</a> &gt; <span class="el_source">ProcessStateServiceImpl.java</span></div><h1>ProcessStateServiceImpl.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl;
+
+import avvillas.core.constant.enums.LoadStatus;
+import avvillas.core.persistence.repository.ExtractRepository;
+import avvillas.core.service.extract_generation.ProcessStateService;
+import avvillas.core.service.implementations.extract_generation_impl.config.ExtractProperties;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Service
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+public class ProcessStateServiceImpl implements ProcessStateService {
+
+<span class="fc" id="L23">    private static final Logger logger = LoggerFactory.getLogger(ProcessStateServiceImpl.class);</span>
+
+    private final ExtractRepository extractRepository;
+    private final ExtractProperties extractProperties;
+
+<span class="fc" id="L28">    private final ConcurrentHashMap&lt;String, ProgressState&gt; progressCache = new ConcurrentHashMap&lt;&gt;();</span>
+
+    @Override
+    public void registerProcess(String extractId) {
+<span class="nc" id="L32">        progressCache.put(extractId, new ProgressState());</span>
+<span class="nc" id="L33">        logger.debug(&quot;[{}] Proceso registrado en el servicio de estado.&quot;, extractId);</span>
+<span class="nc" id="L34">    }</span>
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateProgress(String extractId, long processedItems, long totalItems) {
+<span class="nc" id="L39">        ProgressState state = progressCache.get(extractId);</span>
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        if (state == null || totalItems == 0) {</span>
+<span class="nc" id="L41">            return;</span>
+        }
+
+<span class="nc" id="L44">        int currentPercent = (int) ((double) processedItems / totalItems * 100);</span>
+<span class="nc" id="L45">        int lastPercent = state.lastPersistedPercent.get();</span>
+<span class="nc" id="L46">        long currentTime = Instant.now().toEpochMilli();</span>
+<span class="nc" id="L47">        long timeSinceLastUpdate = currentTime - state.lastPersistedTime;</span>
+
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        boolean shouldUpdate = currentPercent &gt; lastPercent &amp;&amp;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">                (currentPercent - lastPercent &gt;= extractProperties.getState().getProgressThresholdPercent() ||</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                        timeSinceLastUpdate &gt; extractProperties.getState().getTimeThresholdMs());</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (shouldUpdate) {</span>
+<span class="nc" id="L54">            synchronized (state) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                if (state.lastPersistedPercent.get() &lt; currentPercent) {</span>
+<span class="nc" id="L56">                    state.lastPersistedPercent.set(currentPercent);</span>
+<span class="nc" id="L57">                    state.lastPersistedTime = currentTime;</span>
+<span class="nc" id="L58">                    persistProgress(extractId, currentPercent, LoadStatus.ACTIVO, null);</span>
+                }
+<span class="nc" id="L60">            }</span>
+        }
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void markAsCompleted(String extractId, String finalMessage) {
+<span class="nc" id="L67">        logger.info(&quot;[{}] Marcando proceso como FINALIZADO.&quot;, extractId);</span>
+<span class="nc" id="L68">        persistProgress(extractId, 100, LoadStatus.FINALIZADO, finalMessage);</span>
+<span class="nc" id="L69">        progressCache.remove(extractId);</span>
+<span class="nc" id="L70">    }</span>
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void markAsFailed(String extractId, String errorMessage) {
+<span class="nc" id="L75">        logger.error(&quot;[{}] Marcando proceso como ERROR.&quot;, extractId);</span>
+<span class="nc" id="L76">        persistProgress(extractId, -1, LoadStatus.ERROR, errorMessage);</span>
+<span class="nc" id="L77">        progressCache.remove(extractId);</span>
+<span class="nc" id="L78">    }</span>
+
+    protected void persistProgress(String extractId, int percent, LoadStatus status, String details) {
+<span class="nc" id="L81">        Instant startPersist = Instant.now();</span>
+        try {
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            String truncatedDetails = details != null ?</span>
+<span class="nc" id="L84">                    details.substring(0, Math.min(details.length(), 4000)) : null;</span>
+
+<span class="nc" id="L86">            int updated = extractRepository.updateProgressDirectly(</span>
+                    extractId, percent, status, truncatedDetails
+            );
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (updated == 0) {</span>
+<span class="nc" id="L91">                logger.error(&quot;[{}] No se encontró el extract para actualizar&quot;, extractId);</span>
+            }
+
+<span class="nc" id="L94">            long persistDuration = Duration.between(startPersist, Instant.now()).toMillis();</span>
+<span class="nc" id="L95">            logger.debug(&quot;[{}] Progreso persistido en BD en {}ms: {}%, Estado: {}&quot;,</span>
+<span class="nc" id="L96">                    extractId, persistDuration, percent, status);</span>
+<span class="nc" id="L97">        } catch (Exception e) {</span>
+<span class="nc" id="L98">            logger.error(&quot;[{}] Fallo crítico al persistir el estado en la BD.&quot;, extractId, e);</span>
+<span class="nc" id="L99">        }</span>
+<span class="nc" id="L100">    }</span>
+
+<span class="nc" id="L102">    private static class ProgressState {</span>
+<span class="nc" id="L103">        final AtomicInteger lastPersistedPercent = new AtomicInteger(0);</span>
+<span class="nc" id="L104">        volatile long lastPersistedTime = 0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

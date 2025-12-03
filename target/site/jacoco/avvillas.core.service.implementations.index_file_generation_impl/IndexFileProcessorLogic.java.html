@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IndexFileProcessorLogic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.index_file_generation_impl</a> &gt; <span class="el_source">IndexFileProcessorLogic.java</span></div><h1>IndexFileProcessorLogic.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.index_file_generation_impl;
+
+import avvillas.core.constant.MessageConstant;
+import avvillas.core.constant.SubjectConstant;
+import avvillas.core.constant.enums.LoadStatus;
+import avvillas.core.constant.message.IndexFileMessage;
+import avvillas.core.persistence.entity.IndexFileEntity;
+import avvillas.core.persistence.entity.LoadFilesEntryEntity;
+import avvillas.core.persistence.entity.ProcessDataEntity;
+import avvillas.core.persistence.repository.IndexFileRepository;
+import avvillas.core.persistence.repository.LoadFilesEntryRepository;
+import avvillas.core.persistence.repository.ProcessDataRepository;
+import avvillas.core.service.EmailNotificationService;
+import avvillas.core.service.dto.content_index_file.ContentIndexFileDto;
+import avvillas.core.service.dto.content_index_file.RequiredFieldsResDto;
+import avvillas.core.service.dto.path_index_file.PathExtractsArchiveIndexDto;
+import avvillas.core.web.controller.exception.GlobalExceptionHandler;
+import avvillas.core.web.traits.LoaderTrait;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+
+import static avvillas.core.constant.message.LoadFilesEntryMessage.*;
+
+@Component
+<span class="fc" id="L47">@RequiredArgsConstructor</span>
+<span class="fc" id="L48">@Slf4j</span>
+public class IndexFileProcessorLogic {
+
+    private final IndexFileRepository indexFileRepository;
+    private final LoadFilesEntryRepository loadFilesEntryRepository;
+    private final ProcessDataRepository processDataRepository;
+    private final EmailNotificationService emailNotificationService;
+    private final LoaderTrait productTrait;
+
+    private static final String ERROR = &quot;ERROR&quot;;
+
+    @Value(&quot;${EXIT_ROUTE}&quot;)
+    private String exitRoute;
+
+<span class="fc" id="L62">    private final ConcurrentHashMap&lt;String, Integer&gt; lastProgressCache = new ConcurrentHashMap&lt;&gt;();</span>
+
+    public void process(String indexFileId, String productId, String period, PathExtractsArchiveIndexDto path, int maxRecordsPerFile, String token) {
+        try {
+
+<span class="fc" id="L67">            ObjectMapper objectMapper = new ObjectMapper();</span>
+
+<span class="fc" id="L69">            ContentIndexFileDto content = productTrait.getContentFileByProductId(productId, token);</span>
+
+<span class="fc" id="L71">            LoadFilesEntryEntity loadFilesEntry = loadFilesEntryRepository.findFirstByProductIdAndPeriodAndStatusOrderByCreatedAtDesc(productId, period, LoadStatus.FINALIZADO);</span>
+
+<span class="fc" id="L73">            String productName = productTrait.getProductById(productId, token).getDescription();</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">            if (loadFilesEntry == null) {</span>
+<span class="fc" id="L76">                sendNotification(indexFileId, productName, ERROR, MessageConstant.format(LOAD_FILE_ENTRY_NOT_FOUND, productName));</span>
+<span class="fc" id="L77">                throw new GlobalExceptionHandler.GlobalMessageException((MessageConstant.format(LOAD_FILE_ENTRY_NOT_FOUND, productName)));</span>
+            }
+
+<span class="fc" id="L80">            String processId = loadFilesEntry.getId();</span>
+
+<span class="fc" id="L82">            int clientsProcessed = loadFilesEntry.getClientsProcessed();</span>
+
+<span class="fc" id="L84">            Optional&lt;List&lt;ProcessDataEntity&gt;&gt; processData = processDataRepository.findByProcessId(processId);</span>
+
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">            if (processData.isEmpty()) {</span>
+<span class="nc" id="L87">                sendNotification(indexFileId, productName, ERROR, MessageConstant.format(LOAD_FILE_ENTRY_NOT_FOUND, productName));</span>
+<span class="nc" id="L88">                throw new GlobalExceptionHandler.GlobalMessageException((MessageConstant.format(LOAD_FILE_ENTRY_NOT_FOUND, productName)));</span>
+            }
+
+<span class="fc" id="L91">            Path indicesDir = Paths.get(path.getRouteOutputIndex());</span>
+
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">            if (!Files.exists(indicesDir)) {</span>
+<span class="fc" id="L94">                Files.createDirectory(indicesDir);</span>
+            }
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">            if (processData.get().isEmpty()) {</span>
+<span class="fc" id="L98">                sendNotification(indexFileId, productName, ERROR, MessageConstant.format(CLIENT_DATA_NOT_FOUND, productName));</span>
+<span class="fc" id="L99">                log.error(MessageConstant.format(CLIENT_DATA_NOT_FOUND, productName));</span>
+<span class="fc" id="L100">                updateProgress(indexFileId, 100, processId, clientsProcessed);</span>
+<span class="fc" id="L101">                return;</span>
+            }
+
+<span class="fc" id="L104">            List&lt;ProcessDataEntity&gt; clientRecords = processData.get();</span>
+<span class="fc" id="L105">            List&lt;RequiredFieldsResDto&gt; requiredFields = content.getRequiredFields();</span>
+<span class="fc" id="L106">            int totalRecords = clientRecords.size();</span>
+<span class="fc" id="L107">            int totalRecordsLoadFilesEntry = loadFilesEntry.getClientsProcessed();</span>
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if (totalRecords != totalRecordsLoadFilesEntry) {</span>
+<span class="fc" id="L110">                sendNotification(indexFileId, productName, ERROR, String.format(IndexFileMessage.ERROR_INDEX_FILE_TOTAL_DATA, totalRecordsLoadFilesEntry, totalRecords));</span>
+<span class="fc" id="L111">                throw new GlobalExceptionHandler.GlobalMessageException(String.format(IndexFileMessage.ERROR_INDEX_FILE_TOTAL_DATA, totalRecordsLoadFilesEntry, totalRecords));</span>
+            }
+
+<span class="fc" id="L114">            log.info(&quot;Total client records to process: {}&quot;, totalRecords);</span>
+
+<span class="fc" id="L116">            int totalFiles = (int) Math.ceil((double) totalRecords / maxRecordsPerFile);</span>
+<span class="fc" id="L117">            log.info(&quot;Will create {} index files with max {} records per file&quot;, totalFiles, maxRecordsPerFile);</span>
+
+<span class="fc" id="L119">            AtomicInteger processedRecords = new AtomicInteger(0);</span>
+
+<span class="fc" id="L121">            int progressUpdateInterval = Math.max(1, totalRecords / 20);</span>
+
+<span class="fc" id="L123">            IntStream.range(0, totalFiles)</span>
+<span class="fc" id="L124">                    .parallel()</span>
+<span class="fc" id="L125">                    .forEach(fileIndex -&gt; {</span>
+<span class="fc" id="L126">                        int startIndex = fileIndex * maxRecordsPerFile;</span>
+<span class="fc" id="L127">                        int endIndex = Math.min(startIndex + maxRecordsPerFile, totalRecords);</span>
+<span class="fc" id="L128">                        int recordsInThisFile = endIndex - startIndex;</span>
+
+<span class="fc" id="L130">                        String fileNumber = String.format(&quot;%03d&quot;, fileIndex + 1);</span>
+<span class="fc" id="L131">                        String fileName = content.getNameIndexFile() + &quot;_&quot; + fileNumber;</span>
+
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">                        String fileExtension = (content.getTypeFile() == ContentIndexFileDto.TypeFile.CSV) ? &quot;.csv&quot; : &quot;.txt&quot;;</span>
+<span class="fc" id="L134">                        Path filePath = indicesDir.resolve(fileName + fileExtension);</span>
+<span class="fc" id="L135">                        log.info(&quot;Creating index file {} of {}: {}&quot;, (fileIndex + 1), totalFiles, filePath.toAbsolutePath());</span>
+
+<span class="fc" id="L137">                        List&lt;String&gt; formattedRecords = new ArrayList&lt;&gt;(recordsInThisFile);</span>
+
+<span class="fc" id="L139">                        IntStream.range(startIndex, endIndex)</span>
+<span class="fc" id="L140">                                .parallel()</span>
+<span class="fc" id="L141">                                .forEach(i -&gt; {</span>
+<span class="fc" id="L142">                                    ProcessDataEntity eachRecord = clientRecords.get(i);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">                                    if (eachRecord.getData() != null) {</span>
+                                        try {
+<span class="fc" id="L145">                                            String dataString = new String(eachRecord.getData(), StandardCharsets.UTF_8);</span>
+<span class="fc" id="L146">                                            Map&lt;String, Object&gt; dataMap = objectMapper.readValue(dataString, Map.class);</span>
+<span class="fc" id="L147">                                            StringBuilder pdfNameBuilder = new StringBuilder();</span>
+
+<span class="pc bpc" id="L149" title="2 of 4 branches missed.">                                            if (requiredFields != null &amp;&amp; !requiredFields.isEmpty()) {</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">                                                for (RequiredFieldsResDto field : requiredFields) {</span>
+<span class="fc" id="L151">                                                    String fieldValue = &quot;&quot;;</span>
+
+<span class="pc bpc" id="L153" title="2 of 4 branches missed.">                                                    if (field.getIsFixed() != null &amp;&amp; field.getIsFixed()) {</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                                                        if (Objects.equals(field.getContent(), exitRoute)) {</span>
+
+<span class="fc" id="L156">                                                            String routeOutputExtract = path.getRouteOutputExtract();</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">                                                            if (!routeOutputExtract.endsWith(&quot;/&quot;)) routeOutputExtract = routeOutputExtract + &quot;/&quot;;</span>
+
+<span class="fc" id="L159">                                                            pdfNameBuilder.append(&quot;;&quot;).append(routeOutputExtract);</span>
+<span class="fc" id="L160">                                                            pdfNameBuilder.append(dataMap.get(&quot;fileName&quot;).toString()).append(&quot;.pdf&quot;);</span>
+<span class="fc" id="L161">                                                        } else {</span>
+<span class="fc" id="L162">                                                            fieldValue = field.getContent();</span>
+                                                        }
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                                                    } else if (field.getInputStructureProduct() != null) {</span>
+<span class="nc" id="L165">                                                        String fieldId = field.getInputStructureProduct().getId();</span>
+<span class="nc" id="L166">                                                        String fieldName = field.getInputStructureProduct().getFieldName();</span>
+
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                                                        if (dataMap.containsKey(fieldId)) {</span>
+<span class="nc" id="L169">                                                            Object value = dataMap.get(fieldId);</span>
+<span class="nc bnc" id="L170" title="All 4 branches missed.">                                                            if (value instanceof List &amp;&amp; !((List&lt;?&gt;) value).isEmpty()) {</span>
+<span class="nc" id="L171">                                                                fieldValue = ((List&lt;?&gt;) value).get(0).toString();</span>
+                                                            } else {
+<span class="nc" id="L173">                                                                fieldValue = value.toString();</span>
+                                                            }
+<span class="nc" id="L175">                                                        } else {</span>
+<span class="nc" id="L176">                                                            log.warn(&quot;Warning: Field {} not found in data for client ID: {}&quot;, fieldName, eachRecord.getClientId());</span>
+                                                        }
+                                                    }
+<span class="pc bpc" id="L179" title="1 of 4 branches missed.">                                                    if (!pdfNameBuilder.isEmpty() &amp;&amp; !fieldValue.isEmpty())</span>
+<span class="nc" id="L180">                                                        pdfNameBuilder.append(&quot;;&quot;);</span>
+<span class="fc" id="L181">                                                    pdfNameBuilder.append(fieldValue);</span>
+<span class="fc" id="L182">                                                }</span>
+                                            }
+
+<span class="fc" id="L185">                                            synchronized (formattedRecords) {</span>
+<span class="fc" id="L186">                                                formattedRecords.add(pdfNameBuilder.toString());</span>
+<span class="fc" id="L187">                                            }</span>
+<span class="nc" id="L188">                                        } catch (Exception e) {</span>
+<span class="nc" id="L189">                                            log.warn(&quot;Warning: Error processing data for client ID: {} - {}&quot;, eachRecord.getClientId(), e.getMessage());</span>
+<span class="nc" id="L190">                                            synchronized (formattedRecords) {</span>
+<span class="nc" id="L191">                                                formattedRecords.add(&quot;&quot;);</span>
+<span class="nc" id="L192">                                            }</span>
+<span class="pc" id="L193">                                        }</span>
+                                    } else {
+<span class="nc" id="L195">                                        log.warn(&quot;Warning: Skipping null data for client ID: {}&quot;, eachRecord.getClientId());</span>
+<span class="nc" id="L196">                                        synchronized (formattedRecords) {</span>
+<span class="nc" id="L197">                                            formattedRecords.add(&quot;&quot;);</span>
+<span class="nc" id="L198">                                        }</span>
+                                    }
+
+<span class="fc" id="L201">                                    int processed = processedRecords.incrementAndGet();</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">                                    if (processed % progressUpdateInterval == 0) {</span>
+<span class="fc" id="L203">                                        int progress = (int) (((double) processed / totalRecords) * 100);</span>
+<span class="fc" id="L204">                                        updateProgress(indexFileId, progress, &quot;&quot;, 0);</span>
+                                    }
+<span class="fc" id="L206">                                });</span>
+
+                        try {
+<span class="fc" id="L209">                            try (BufferedWriter writer = new BufferedWriter(</span>
+<span class="fc" id="L210">                                    new OutputStreamWriter(new FileOutputStream(filePath.toFile()), StandardCharsets.UTF_8))) {</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">                                for (String eachRecord : formattedRecords) {</span>
+<span class="fc" id="L212">                                    writer.write(eachRecord);</span>
+<span class="fc" id="L213">                                    writer.newLine();</span>
+<span class="fc" id="L214">                                }</span>
+<span class="fc" id="L215">                                writer.flush();</span>
+                            }
+
+<span class="fc" id="L218">                            log.info(&quot;Successfully created index file: {}&quot;, filePath.getFileName());</span>
+<span class="fc" id="L219">                            log.info(&quot;Expected record count: {}&quot;, recordsInThisFile);</span>
+<span class="fc" id="L220">                            log.info(&quot;Actual record count: {}&quot;, formattedRecords.size());</span>
+
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">                            if (formattedRecords.size() != recordsInThisFile) {</span>
+<span class="nc" id="L223">                                log.warn(&quot;WARNING: Actual record count does not match expected count!&quot;);</span>
+                            } else {
+<span class="fc" id="L225">                                log.info(&quot;Verification successful: File contains the expected number of records.&quot;);</span>
+                            }
+<span class="nc" id="L227">                        } catch (IOException e) {</span>
+<span class="nc" id="L228">                            log.error(&quot;Error writing file {}: {}&quot;, filePath, e.getMessage());</span>
+<span class="fc" id="L229">                        }</span>
+<span class="fc" id="L230">                    });</span>
+
+            try {
+<span class="fc" id="L233">                Thread.sleep(500);</span>
+<span class="nc" id="L234">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L235">                Thread.currentThread().interrupt();</span>
+<span class="fc" id="L236">            }</span>
+
+<span class="fc" id="L238">            updateProgress(indexFileId, 100, processId, clientsProcessed);</span>
+<span class="fc" id="L239">            sendNotification(indexFileId, productName, &quot;FINALIZADO&quot;, String.format(IndexFileMessage.PROCESS_INDEX_FINALIZED, productName, totalRecordsLoadFilesEntry, totalRecords));</span>
+<span class="fc" id="L240">            log.info(&quot;Index file generation completed successfully. Created {} files with {} total records.&quot;, totalFiles, totalRecords);</span>
+
+<span class="fc" id="L242">        } catch (Exception e) {</span>
+<span class="fc" id="L243">            String errorMsg = &quot;Error creating index files: &quot; + e.getMessage();</span>
+<span class="fc" id="L244">            log.error(errorMsg);</span>
+<span class="fc" id="L245">            updateProgress(indexFileId, -1, &quot;&quot;, 0);</span>
+<span class="fc" id="L246">        }</span>
+<span class="fc" id="L247">    }</span>
+
+    private void sendNotification(String processId, String productName, String status, String details) {
+        try {
+<span class="fc" id="L251">            indexFileRepository.findById(processId).ifPresent(process -&gt; emailNotificationService.sendProcessStatusNotification(productName, status, details, SubjectConstant.SUBJECT_INDEX));</span>
+<span class="nc" id="L252">        } catch (Exception e) {</span>
+<span class="nc" id="L253">            log.error(&quot;Fallo al intentar enviar la notificación por correo para el proceso {}: {}&quot;, processId, e.getMessage());</span>
+<span class="fc" id="L254">        }</span>
+<span class="fc" id="L255">    }</span>
+
+    private void updateProgress(String indexFileId, int progress, String processId, int clientsProcessed) {
+        try {
+<span class="fc" id="L259">            Integer lastProgress = lastProgressCache.getOrDefault(indexFileId, -1);</span>
+
+<span class="pc bpc" id="L261" title="1 of 6 branches missed.">            if (progress == 100 || progress == -1 || Math.abs(progress - lastProgress) &gt;= 5) {</span>
+<span class="fc" id="L262">                IndexFileEntity entity = indexFileRepository.findById(indexFileId)</span>
+<span class="pc" id="L263">                        .orElseThrow(() -&gt; new NoSuchElementException(MessageConstant.format(IndexFileMessage.INDEX_FILE_NOT_FOUND, indexFileId)));</span>
+<span class="fc" id="L264">                entity.setPercentAdvance(progress);</span>
+
+<span class="fc bfc" id="L266" title="All 2 branches covered.">                if (progress == -1) entity.setStatus(LoadStatus.ERROR);</span>
+
+<span class="fc bfc" id="L268" title="All 2 branches covered.">                if (progress == 100) {</span>
+<span class="fc" id="L269">                    entity.setProcessId(processId);</span>
+<span class="fc" id="L270">                    entity.setClientsProcessed(clientsProcessed);</span>
+<span class="fc" id="L271">                    entity.setStatus(LoadStatus.FINALIZADO);</span>
+                }
+
+<span class="fc" id="L274">                indexFileRepository.save(entity);</span>
+
+<span class="fc" id="L276">                lastProgressCache.put(indexFileId, progress);</span>
+            }
+<span class="nc" id="L278">        } catch (Exception e) {</span>
+<span class="nc" id="L279">            log.error(&quot;Error updating progress: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L280">        }</span>
+<span class="fc" id="L281">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,23 +1,27 @@
-# Generate build
-FROM node:22.13.0 AS build
+# Oracle linux 9 like SO
+FROM oraclelinux:9-slim
 
+# Maven and Java 21
+RUN microdnf install dnf && \
+    dnf -y update && \
+    dnf -y install java-21-openjdk-devel maven && \
+    dnf clean all
+
+# ENV for java version
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Create directory for save application
 WORKDIR /app
 
-COPY package.json ./
+# Copy project in directory created
+COPY . /app
 
-RUN npm install
+# Build project with maven
+RUN mvn clean package -DskipTests
 
-COPY . .
+# Expose port where app executed
+EXPOSE 8081
 
-RUN npm run build:estres
-
-# Serve with NGINX
-FROM nginx:alpine
-
-COPY --from=build /app/dist /usr/share/nginx/html
-
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Executed app generated with maven
+CMD ["java", "-jar", "/app/target/core-1.0.jar"]

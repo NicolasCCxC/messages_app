@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HtmlTemplateServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl</a> &gt; <span class="el_source">HtmlTemplateServiceImpl.java</span></div><h1>HtmlTemplateServiceImpl.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl;
+
+import avvillas.core.service.dto.format.FormatDto;
+import avvillas.core.service.extract_generation.HtmlTemplateService;
+import avvillas.core.service.implementations.extract_generation_impl.html.ArrayLayoutAnalyzer;
+import avvillas.core.service.implementations.extract_generation_impl.html.HtmlElementRenderer;
+import avvillas.core.service.implementations.extract_generation_impl.html.HtmlStructureExtractor;
+import avvillas.core.service.implementations.extract_generation_impl.html.RowDataDistributor;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Service
+<span class="fc" id="L19">@RequiredArgsConstructor</span>
+public class HtmlTemplateServiceImpl implements HtmlTemplateService {
+
+<span class="fc" id="L22">    private static final Logger logger = LoggerFactory.getLogger(HtmlTemplateServiceImpl.class);</span>
+    private final HtmlStructureExtractor structureExtractor;
+    private final ArrayLayoutAnalyzer layoutAnalyzer;
+    private final RowDataDistributor rowDataDistributor;
+    private final HtmlElementRenderer elementRenderer;
+
+    @Override
+    public String prepareClientHtml(String baseHtmlTemplate, Map&lt;String, Object&gt; clientData, FormatDto formatDto) {
+<span class="nc" id="L30">        String initialHtml = replacePlaceholders(baseHtmlTemplate, clientData);</span>
+
+<span class="nc" id="L32">        HtmlStructureExtractor.HtmlPageStructure structure = structureExtractor.extract(initialHtml);</span>
+
+<span class="nc" id="L34">        List&lt;FormatDto.ElementResponse&gt; firstPageGroup = layoutAnalyzer.findArrayColumnGroup(formatDto.getPages().get(0), clientData);</span>
+
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (firstPageGroup.isEmpty()) {</span>
+<span class="nc" id="L37">            logger.warn(&quot;No se encontro un grupo de columnas de array valido.&quot;);</span>
+<span class="nc" id="L38">            String staticElements = elementRenderer.generateForPage(clientData, formatDto.getPages().get(0), null, new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L39">            return structure.htmlHead() + injectElementsIntoPageDiv(structure.firstPageTemplate(), staticElements) + structure.htmlFoot();</span>
+        }
+
+<span class="nc" id="L42">        RowDataDistributor.ArrayDistribution distribution = rowDataDistributor.calculate(clientData, formatDto, firstPageGroup);</span>
+
+<span class="nc bnc" id="L44" title="All 4 branches missed.">        boolean isContinuesMode = formatDto.getPdfConfig() != null &amp;&amp; Boolean.TRUE.equals(formatDto.getPdfConfig().getContinues());</span>
+
+<span class="nc" id="L46">        int totalPagesInFormat = formatDto.getPages().size();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        int pagesToRender = isContinuesMode</span>
+<span class="nc" id="L48">                ? distribution.totalPagesNeeded()</span>
+<span class="nc" id="L49">                : Math.min(distribution.totalPagesNeeded(), totalPagesInFormat);</span>
+<span class="nc" id="L50">        StringBuilder finalHtml = new StringBuilder(structure.htmlHead());</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        for (int pageNum = 1; pageNum &lt;= pagesToRender; pageNum++) {</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            boolean isFirstPage = (pageNum == 1);</span>
+
+<span class="nc bnc" id="L54" title="All 4 branches missed.">            String pageTemplate = (isFirstPage || structure.continuationPageTemplate().isEmpty())</span>
+<span class="nc" id="L55">                    ? structure.firstPageTemplate()</span>
+<span class="nc" id="L56">                    : structure.continuationPageTemplate();</span>
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            FormatDto.PageResponse pageConfig = formatDto.getPages().get(isFirstPage ? 0 : 1);</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            List&lt;FormatDto.ElementResponse&gt; currentPageGroup = isFirstPage</span>
+<span class="nc" id="L61">                    ? firstPageGroup</span>
+<span class="nc" id="L62">                    : layoutAnalyzer.findArrayColumnGroup(pageConfig, clientData);</span>
+
+<span class="nc" id="L64">            List&lt;Map&lt;String, String&gt;&gt; rowsForThisPage = distribution.rowsByPage().get(pageNum);</span>
+
+<span class="nc" id="L66">            String positionedElements = elementRenderer.generateForPage(clientData, pageConfig, rowsForThisPage, currentPageGroup);</span>
+<span class="nc" id="L67">            finalHtml.append(injectElementsIntoPageDiv(pageTemplate, positionedElements));</span>
+        }
+
+<span class="nc" id="L70">        finalHtml.append(structure.htmlFoot());</span>
+<span class="nc" id="L71">        return finalHtml.toString();</span>
+    }
+
+    private String replacePlaceholders(String template, Map&lt;String, Object&gt; data) {
+<span class="nc" id="L75">        String result = template;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        for (Map.Entry&lt;String, Object&gt; entry : data.entrySet()) {</span>
+<span class="nc" id="L77">            String placeholder = &quot;{{&quot; + entry.getKey() + &quot;}}&quot;;</span>
+<span class="nc" id="L78">            Object value = entry.getValue();</span>
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (!(value instanceof List)) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                String stringValue = (value != null) ? value.toString() : &quot;&quot;;</span>
+<span class="nc" id="L82">                result = result.replace(placeholder, stringValue);</span>
+            }
+<span class="nc" id="L84">        }</span>
+<span class="nc" id="L85">        return result;</span>
+    }
+
+    private String injectElementsIntoPageDiv(String pageTemplate, String elements) {
+<span class="nc" id="L89">        int closingDivIndex = pageTemplate.lastIndexOf(&quot;&lt;/div&gt;&quot;);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (closingDivIndex != -1) {</span>
+<span class="nc" id="L91">            return new StringBuilder(pageTemplate).insert(closingDivIndex, elements).toString();</span>
+        }
+<span class="nc" id="L93">        return pageTemplate + elements;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

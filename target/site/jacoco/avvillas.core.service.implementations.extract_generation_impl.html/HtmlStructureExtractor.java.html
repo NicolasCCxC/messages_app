@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HtmlStructureExtractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl.html</a> &gt; <span class="el_source">HtmlStructureExtractor.java</span></div><h1>HtmlStructureExtractor.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl.html;
+
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="fc" id="L6">public class HtmlStructureExtractor {</span>
+
+    private static final String PAGE_DIV_CLASS = &quot;&lt;div class='page'&gt;&quot;;
+    private static final String CLOSE_DIV_TAG = &quot;&lt;/div&gt;&quot;;
+    private static final String DIV_ELEMENT = &quot;&lt;div&quot;;
+
+    public HtmlPageStructure extract(String baseHtmlTemplate) {
+<span class="nc" id="L13">        int firstPageStart = baseHtmlTemplate.indexOf(PAGE_DIV_CLASS);</span>
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        if (firstPageStart == -1) {</span>
+<span class="nc" id="L15">            return new HtmlPageStructure(&quot;&quot;, baseHtmlTemplate, &quot;&quot;, &quot;&quot;);</span>
+        }
+
+<span class="nc" id="L18">        int firstPageEnd = findMatchingCloseDiv(baseHtmlTemplate, firstPageStart);</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        if (firstPageEnd == -1) {</span>
+<span class="nc" id="L20">            String head = baseHtmlTemplate.substring(0, firstPageStart);</span>
+<span class="nc" id="L21">            String page1 = baseHtmlTemplate.substring(firstPageStart);</span>
+<span class="nc" id="L22">            return new HtmlPageStructure(head, page1, &quot;&quot;, &quot;&quot;);</span>
+        }
+
+<span class="nc" id="L25">        String htmlHead = baseHtmlTemplate.substring(0, firstPageStart);</span>
+<span class="nc" id="L26">        String firstPage = baseHtmlTemplate.substring(firstPageStart, firstPageEnd);</span>
+
+<span class="nc" id="L28">        int secondPageStart = baseHtmlTemplate.indexOf(PAGE_DIV_CLASS, firstPageEnd);</span>
+<span class="nc" id="L29">        String secondPage = &quot;&quot;;</span>
+<span class="nc" id="L30">        String htmlFoot = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (secondPageStart != -1) {</span>
+<span class="nc" id="L33">            int secondPageEnd = findMatchingCloseDiv(baseHtmlTemplate, secondPageStart);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">            if (secondPageEnd != -1) {</span>
+<span class="nc" id="L35">                secondPage = baseHtmlTemplate.substring(secondPageStart, secondPageEnd);</span>
+<span class="nc" id="L36">                htmlFoot = baseHtmlTemplate.substring(secondPageEnd);</span>
+            } else {
+<span class="nc" id="L38">                secondPage = baseHtmlTemplate.substring(secondPageStart);</span>
+            }
+<span class="nc" id="L40">        } else {</span>
+<span class="nc" id="L41">            htmlFoot = baseHtmlTemplate.substring(firstPageEnd);</span>
+        }
+<span class="nc" id="L43">        return new HtmlPageStructure(htmlHead, firstPage, secondPage, htmlFoot);</span>
+    }
+
+    private int findMatchingCloseDiv(String html, int openDivStart) {
+<span class="nc" id="L47">        int divCount = 1;</span>
+<span class="nc" id="L48">        int currentPos = html.indexOf('&gt;', openDivStart) + 1;</span>
+
+<span class="nc bnc" id="L50" title="All 4 branches missed.">        while (currentPos &lt; html.length() &amp;&amp; divCount &gt; 0) {</span>
+<span class="nc" id="L51">            int nextOpenDiv = html.indexOf(DIV_ELEMENT, currentPos);</span>
+<span class="nc" id="L52">            int nextCloseDiv = html.indexOf(CLOSE_DIV_TAG, currentPos);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (nextCloseDiv == -1) return -1;</span>
+
+<span class="nc bnc" id="L56" title="All 4 branches missed.">            if (nextOpenDiv != -1 &amp;&amp; nextOpenDiv &lt; nextCloseDiv) {</span>
+<span class="nc" id="L57">                divCount++;</span>
+<span class="nc" id="L58">                currentPos = nextOpenDiv + 4;</span>
+            } else {
+<span class="nc" id="L60">                divCount--;</span>
+<span class="nc" id="L61">                currentPos = nextCloseDiv + 6;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                if (divCount == 0) return currentPos;</span>
+            }
+<span class="nc" id="L64">        }</span>
+<span class="nc" id="L65">        return -1;</span>
+    }
+
+<span class="nc" id="L68">    public record HtmlPageStructure(String htmlHead, String firstPageTemplate, String continuationPageTemplate,</span>
+                                    String htmlFoot) {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

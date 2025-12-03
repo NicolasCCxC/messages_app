@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HtmlElementRenderer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl.html</a> &gt; <span class="el_source">HtmlElementRenderer.java</span></div><h1>HtmlElementRenderer.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl.html;
+
+import avvillas.core.service.dto.format.FormatDto;
+import avvillas.core.service.extract_generation.BarcodeService;
+import avvillas.core.service.implementations.extract_generation_impl.config.ExtractProperties;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Component
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
+public class HtmlElementRenderer {
+
+<span class="fc" id="L21">    private static final Logger logger = LoggerFactory.getLogger(HtmlElementRenderer.class);</span>
+
+    private static final int LINE_HEIGHT = 18;
+    private static final String BASE_ELEMENT_STYLE = &quot;font-weight: 100 !important; font-size: 11px !important; position: absolute;&quot;;
+    private static final String BARCODE_PREFIX = &quot;BARCODE::&quot;;
+    private static final String MONEY_PREFIX = &quot;MONEY::&quot;;
+
+
+    private final BarcodeService barcodeService;
+    private final ExtractProperties extractProperties;
+
+    private String createMoneyElement(String prefixedValue, int x, int y) {
+<span class="fc" id="L33">        String content = prefixedValue.substring(MONEY_PREFIX.length());</span>
+<span class="fc" id="L34">        int columnWidth = 75;</span>
+<span class="fc" id="L35">        return String.format(</span>
+                &quot;&lt;div style=\&quot;%s left: %dpx; top: %dpx; width: %dpx; text-align: right;\&quot;&gt;%s&lt;/div&gt;&quot;,
+<span class="fc" id="L37">                BASE_ELEMENT_STYLE, x, y, columnWidth, content</span>
+        );
+    }
+
+    public String generateForPage(Map&lt;String, Object&gt; clientData,
+                                  FormatDto.PageResponse pageConfig,
+                                  List&lt;Map&lt;String, String&gt;&gt; rowsForThisPage,
+                                  List&lt;FormatDto.ElementResponse&gt; arrayColumnGroup) {
+
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (pageConfig.getElements() == null) return &quot;&quot;;</span>
+
+<span class="fc" id="L48">        StringBuilder elementsHtml = new StringBuilder();</span>
+<span class="fc" id="L49">        Set&lt;String&gt; arrayFieldIds = arrayColumnGroup.stream()</span>
+<span class="fc" id="L50">                .map(FormatDto.ElementResponse::getFieldId)</span>
+<span class="fc" id="L51">                .collect(Collectors.toSet());</span>
+
+<span class="fc" id="L53">        pageConfig.getElements().stream()</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">                .filter(element -&gt; !arrayFieldIds.contains(element.getFieldId()))</span>
+<span class="fc" id="L55">                .forEach(element -&gt; {</span>
+<span class="fc" id="L56">                    String value = clientData.getOrDefault(element.getFieldId(), &quot;&quot;).toString();</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">                    if (!value.isEmpty()) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">                        if (value.startsWith(BARCODE_PREFIX)) {</span>
+<span class="fc" id="L59">                            elementsHtml.append(createBarcodeElement(value, element));</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                        } else if (value.startsWith(MONEY_PREFIX)) {</span>
+<span class="fc" id="L61">                            elementsHtml.append(createMoneyElement(value, element.getPositionX(), element.getPositionY()));</span>
+                        } else {
+<span class="fc" id="L63">                            elementsHtml.append(createPositionedElement(value, element.getPositionX(), element.getPositionY()));</span>
+                        }
+                    }
+<span class="fc" id="L66">                });</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (rowsForThisPage != null) {</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            for (int i = 0; i &lt; rowsForThisPage.size(); i++) {</span>
+<span class="fc" id="L70">                Map&lt;String, String&gt; currentRow = rowsForThisPage.get(i);</span>
+<span class="fc" id="L71">                int baseY = i * LINE_HEIGHT;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                for (FormatDto.ElementResponse columnConfig : arrayColumnGroup) {</span>
+<span class="fc" id="L73">                    String cellValue = currentRow.getOrDefault(columnConfig.getFieldId(), &quot;&quot;).trim();</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">                    if (!cellValue.isEmpty()) {</span>
+<span class="fc" id="L75">                        int finalX = columnConfig.getPositionX();</span>
+<span class="fc" id="L76">                        int finalY = columnConfig.getPositionY() + baseY;</span>
+
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                        if (cellValue.startsWith(MONEY_PREFIX)) {</span>
+<span class="fc" id="L79">                            elementsHtml.append(createMoneyElement(cellValue, finalX, finalY));</span>
+                        } else {
+<span class="fc" id="L81">                            elementsHtml.append(createPositionedElement(cellValue, finalX, finalY));</span>
+                        }
+                    }
+<span class="fc" id="L84">                }</span>
+            }
+        }
+<span class="fc" id="L87">        return elementsHtml.toString();</span>
+    }
+
+    private String createPositionedElement(String content, int x, int y) {
+<span class="fc" id="L91">        return &quot;&lt;span style=\&quot;&quot; + BASE_ELEMENT_STYLE +</span>
+                &quot; left: &quot; + x + &quot;px; top: &quot; + y + &quot;px;\&quot;&gt;&quot; +
+                content + &quot;&lt;/span&gt;&quot;;
+    }
+
+    private String createBarcodeElement(String prefixedValue, FormatDto.ElementResponse element) {
+<span class="fc" id="L97">        String barcodeValue = prefixedValue.substring(BARCODE_PREFIX.length());</span>
+
+        try {
+<span class="fc" id="L100">            String base64Image = barcodeService.generateCode128BarcodeAsBase64(barcodeValue);</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if (base64Image == null) return &quot;&quot;;</span>
+
+<span class="fc" id="L103">            return String.format(</span>
+                    &quot;&lt;div style=\&quot;position: absolute; top: %dpx; left: %dpx;\&quot;&gt;&quot; +
+                            &quot;&lt;img src=\&quot;%s\&quot; alt=\&quot;Barcode\&quot; style=\&quot;display: block; width: %spx; height: %spx; margin: 0 auto;\&quot; /&gt;&quot; +
+                            &quot;&lt;div style=\&quot;text-align: center; font-size: 5px; margin-bottom: 0px;\&quot;&gt;%s&lt;/div&gt;&quot; +
+                            &quot;&lt;/div&gt;&quot;,
+
+<span class="fc" id="L109">                    element.getPositionY(),</span>
+<span class="fc" id="L110">                    element.getPositionX(),</span>
+                    base64Image,
+<span class="fc" id="L112">                    extractProperties.getProcess().getBarcodeWidth(),</span>
+<span class="fc" id="L113">                    extractProperties.getProcess().getBarcodeHeight(),</span>
+                    barcodeValue
+            );
+
+<span class="nc" id="L117">        } catch (IOException e) {</span>
+<span class="nc" id="L118">            logger.error(&quot;Error generando HTML para código de barras con valor '{}'&quot;, barcodeValue, e);</span>
+<span class="nc" id="L119">            return &quot;&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

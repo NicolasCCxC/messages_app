@@ -1,0 +1,22 @@
+# Usar la misma imagen base que en tu pipeline de Jenkins
+ARG MAVEN_VERSION=3.9.5
+ARG JAVA_VERSION=21
+FROM maven:${MAVEN_VERSION}-eclipse-temurin-${JAVA_VERSION}
+
+# Establecer directorio de trabajo (mismo que en tu Jenkins)
+WORKDIR /usr/src/app
+
+# Crear directorio .m2 con permisos correctos (replica tu stage 'Prepare .m2 directory')
+RUN mkdir -p /home/maven/.m2 && \
+    chown -R maven:maven /home/maven/.m2 || echo "Permisos ajustados o no necesarios"
+
+# Copiar todo el código fuente
+COPY . .
+
+# Compilar exactamente como en tu Jenkins pipeline
+RUN mvn clean verify
+
+# Verificar compilación (igual que en tu Jenkins)
+RUN ls -la target/classes
+
+# Este Dockerfile solo compila - no ejecuta la aplicación

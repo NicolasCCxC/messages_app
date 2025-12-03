@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RowDataDistributor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl.html</a> &gt; <span class="el_source">RowDataDistributor.java</span></div><h1>RowDataDistributor.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl.html;
+
+import avvillas.core.service.dto.format.FormatDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Component
+<span class="fc" id="L14">@RequiredArgsConstructor</span>
+public class RowDataDistributor {
+
+    private static final int LINE_HEIGHT = 18;
+    private static final int PIXEL_TOLERANCE = 5;
+    private static final int DEFAULT_PAGE_HEIGHT_A4 = 1123;
+    private final ArrayLayoutAnalyzer layoutAnalyzer;
+
+    public ArrayDistribution calculate(Map&lt;String, Object&gt; clientData, FormatDto format, List&lt;FormatDto.ElementResponse&gt; firstPageColumnGroup) {
+<span class="nc" id="L23">        List&lt;Map&lt;String, String&gt;&gt; allRows = reconstructRowsFromColumns(clientData, firstPageColumnGroup);</span>
+<span class="nc" id="L24">        Map&lt;Integer, List&lt;Map&lt;String, String&gt;&gt;&gt; rowsByPage = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L25">        String size = format.getPdfConfig().getPaperType();</span>
+<span class="nc" id="L26">        List&lt;Map&lt;String, String&gt;&gt; rowsOnFirstPage = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L27">        rowsByPage.put(1, rowsOnFirstPage);</span>
+
+<span class="nc" id="L29">        FormatDto.PageResponse firstPageConfig = format.getPages().get(0);</span>
+<span class="nc" id="L30">        int startYOnFirstPage = firstPageColumnGroup.get(0).getPositionY();</span>
+<span class="nc" id="L31">        int limitYOnFirstPage = calculatePageLimit(firstPageConfig, firstPageColumnGroup, size) - LINE_HEIGHT;</span>
+
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        for (Map&lt;String, String&gt; row : allRows) {</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">            if ((startYOnFirstPage + (rowsOnFirstPage.size() * LINE_HEIGHT)) &lt;= limitYOnFirstPage) {</span>
+<span class="nc" id="L35">                rowsOnFirstPage.add(row);</span>
+            } else {
+                break;
+            }
+<span class="nc" id="L39">        }</span>
+
+<span class="nc" id="L41">        List&lt;Map&lt;String, String&gt;&gt; remainingRows = allRows.subList(rowsOnFirstPage.size(), allRows.size());</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">        if (!remainingRows.isEmpty() &amp;&amp; format.getPages().size() &gt; 1) {</span>
+<span class="nc" id="L43">            paginateRemainingRows(remainingRows, rowsByPage, clientData, format);</span>
+        }
+
+<span class="nc" id="L46">        return new ArrayDistribution(rowsByPage.keySet().size(), rowsByPage);</span>
+    }
+
+    private void paginateRemainingRows(List&lt;Map&lt;String, String&gt;&gt; remainingRows, Map&lt;Integer, List&lt;Map&lt;String, String&gt;&gt;&gt; rowsByPage, Map&lt;String, Object&gt; clientData, FormatDto format) {
+<span class="nc" id="L50">        FormatDto.PageResponse contPageConfig = format.getPages().get(1);</span>
+<span class="nc" id="L51">        String size = format.getPdfConfig().getPaperType();</span>
+<span class="nc" id="L52">        List&lt;FormatDto.ElementResponse&gt; contColumnGroup = layoutAnalyzer.findArrayColumnGroup(contPageConfig, clientData);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (contColumnGroup.isEmpty()) return;</span>
+
+<span class="nc" id="L56">        int currentPageNum = 2;</span>
+<span class="nc" id="L57">        int startYOnContPage = contColumnGroup.get(0).getPositionY();</span>
+<span class="nc" id="L58">        int limitYOnContPage = calculatePageLimit(contPageConfig, contColumnGroup, size) - LINE_HEIGHT;</span>
+<span class="nc" id="L59">        int rowsPerContPage = Math.max(1, (limitYOnContPage - startYOnContPage) / LINE_HEIGHT);</span>
+
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        for (int i = 0; i &lt; remainingRows.size(); i += rowsPerContPage) {</span>
+<span class="nc" id="L62">            int end = Math.min(i + rowsPerContPage, remainingRows.size());</span>
+<span class="nc" id="L63">            rowsByPage.put(currentPageNum++, remainingRows.subList(i, end));</span>
+        }
+<span class="nc" id="L65">    }</span>
+
+    public List&lt;Map&lt;String, String&gt;&gt; reconstructRowsFromColumns(Map&lt;String, Object&gt; clientData, List&lt;FormatDto.ElementResponse&gt; columnGroup) {
+<span class="nc" id="L68">        int maxRows = columnGroup.stream()</span>
+<span class="nc" id="L69">                .map(column -&gt; clientData.get(column.getFieldId()))</span>
+<span class="nc" id="L70">                .filter(List.class::isInstance)</span>
+<span class="nc" id="L71">                .map(list -&gt; ((List&lt;?&gt;) list).size())</span>
+<span class="nc" id="L72">                .max(Integer::compareTo)</span>
+<span class="nc" id="L73">                .orElse(0);</span>
+
+<span class="nc" id="L75">        List&lt;Map&lt;String, String&gt;&gt; rows = new ArrayList&lt;&gt;(maxRows);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        for (int i = 0; i &lt; maxRows; i++) {</span>
+<span class="nc" id="L77">            Map&lt;String, String&gt; row = new HashMap&lt;&gt;(columnGroup.size());</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            for (FormatDto.ElementResponse column : columnGroup) {</span>
+<span class="nc" id="L79">                Object columnData = clientData.get(column.getFieldId());</span>
+<span class="nc" id="L80">                String cellValue = &quot;&quot;;</span>
+<span class="nc bnc" id="L81" title="All 6 branches missed.">                if (columnData instanceof List&lt;?&gt; list &amp;&amp; i &lt; list.size() &amp;&amp; list.get(i) != null) {</span>
+<span class="nc" id="L82">                    cellValue = list.get(i).toString();</span>
+                }
+<span class="nc" id="L84">                row.put(column.getFieldId(), cellValue);</span>
+<span class="nc" id="L85">            }</span>
+<span class="nc" id="L86">            rows.add(row);</span>
+        }
+<span class="nc" id="L88">        return rows;</span>
+    }
+
+    private int calculatePageLimit(FormatDto.PageResponse page, List&lt;FormatDto.ElementResponse&gt; columnGroup, String size) {
+<span class="nc bnc" id="L92" title="All 4 branches missed.">        if (page.getElements() == null || columnGroup.isEmpty()) {</span>
+<span class="nc" id="L93">            return getPageHeight(size);</span>
+        }
+
+<span class="nc" id="L96">        int maxArrayY = columnGroup.stream()</span>
+<span class="nc" id="L97">                .mapToInt(FormatDto.ElementResponse::getPositionY)</span>
+<span class="nc" id="L98">                .max()</span>
+<span class="nc" id="L99">                .orElse(0);</span>
+
+<span class="nc" id="L101">        return page.getElements().stream()</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                .filter(element -&gt; element.getPositionY() &gt; (maxArrayY + PIXEL_TOLERANCE))</span>
+<span class="nc" id="L103">                .min(Comparator.comparing(FormatDto.ElementResponse::getPositionY))</span>
+<span class="nc" id="L104">                .map(FormatDto.ElementResponse::getPositionY)</span>
+<span class="nc" id="L105">                .orElse(getPageHeight(size));</span>
+    }
+
+    private int getPageHeight(String paperType) {
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (paperType == null) return DEFAULT_PAGE_HEIGHT_A4;</span>
+<span class="nc bnc" id="L110" title="All 3 branches missed.">        return switch (paperType.toUpperCase()) {</span>
+<span class="nc" id="L111">            case &quot;LETTER&quot; -&gt; 1056;</span>
+<span class="nc" id="L112">            case &quot;LEGAL&quot; -&gt; 1344;</span>
+<span class="nc" id="L113">            default -&gt; DEFAULT_PAGE_HEIGHT_A4;</span>
+        };
+    }
+
+<span class="nc" id="L117">    public record ArrayDistribution(int totalPagesNeeded, Map&lt;Integer, List&lt;Map&lt;String, String&gt;&gt;&gt; rowsByPage) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

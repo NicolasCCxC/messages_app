@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExtractOrchestratorServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Generación de extractos AV Villas</a> &gt; <a href="index.source.html" class="el_package">avvillas.core.service.implementations.extract_generation_impl</a> &gt; <span class="el_source">ExtractOrchestratorServiceImpl.java</span></div><h1>ExtractOrchestratorServiceImpl.java</h1><pre class="source lang-java linenums">package avvillas.core.service.implementations.extract_generation_impl;
+
+import avvillas.core.constant.enums.LoadStatus;
+import avvillas.core.constant.message.ExtractMessage;
+import avvillas.core.constant.message.IndexFileMessage;
+import avvillas.core.persistence.entity.ExtractEntity;
+import avvillas.core.persistence.entity.IndexFileEntity;
+import avvillas.core.persistence.mapper.ExtractMapper;
+import avvillas.core.persistence.repository.ExtractRepository;
+import avvillas.core.persistence.repository.IndexFileRepository;
+import avvillas.core.service.dto.UserNameAndEmailDto;
+import avvillas.core.service.dto.extract.ExtractDto;
+import avvillas.core.service.dto.extract.ExtractResDto;
+import avvillas.core.service.dto.product.ProductCodeDescriptionDTO;
+import avvillas.core.service.extract_generation.ExtractOrchestratorService;
+import avvillas.core.service.extract_generation.ExtractProcessorService;
+import avvillas.core.service.extract_generation.ProcessStateService;
+import avvillas.core.service.specification.ExtractSpecification;
+import avvillas.core.web.traits.LoaderTrait;
+import avvillas.core.web.traits.ProductTrait;
+import avvillas.core.web.traits.UserTrait;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L41">@RequiredArgsConstructor</span>
+public class ExtractOrchestratorServiceImpl implements ExtractOrchestratorService {
+
+<span class="fc" id="L44">    private static final Logger logger = LoggerFactory.getLogger(ExtractOrchestratorServiceImpl.class);</span>
+
+
+    private final ExtractProcessorService extractProcessorService;
+    private final ProcessStateService processStateService;
+
+    private final LoaderTrait loaderTrait;
+    private final ProductTrait productTrait;
+    private final UserTrait userTrait;
+    private final ExtractRepository extractRepository;
+    private final IndexFileRepository indexFileRepository;
+    private final ExtractMapper extractMapper;
+
+    @Override
+    @Transactional
+    public ExtractDto generateExtracts(ExtractDto extractDto, String userId) {
+<span class="nc" id="L60">        String productId = extractDto.getProductId();</span>
+<span class="nc" id="L61">        String period = extractDto.getPeriod();</span>
+
+<span class="nc" id="L63">        logger.info(&quot;[PASO 1] Solicitud de generación recibida para producto {} y período {}.&quot;, productId, period);</span>
+
+<span class="nc" id="L65">        extractRepository.findFirstByProductIdAndPeriodOrderByCreatedAtDesc(productId, period)</span>
+<span class="nc" id="L66">                .ifPresent(prev -&gt; {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">                    if (Objects.equals(prev.getStatus(), LoadStatus.ACTIVO)) {</span>
+<span class="nc" id="L68">                        throw new IllegalStateException(String.format(ExtractMessage.ERROR_EXTRACT_PROCESS, productId));</span>
+                    }
+<span class="nc" id="L70">                });</span>
+
+<span class="nc" id="L72">        IndexFileEntity indexFile = indexFileRepository.findFirstByProductIdAndPeriodAndStatusOrderByCreatedAtDesc(productId, period, LoadStatus.FINALIZADO)</span>
+<span class="nc" id="L73">                .orElseThrow(() -&gt; new NoSuchElementException(</span>
+<span class="nc" id="L74">                        String.format(IndexFileMessage.INDEX_FILE_NOT_FOUND_BY_PRODUCT_ID, productId, period)</span>
+                ));
+
+<span class="nc" id="L77">        ExtractEntity extractEntity = new ExtractEntity();</span>
+<span class="nc" id="L78">        extractEntity.setProductId(productId);</span>
+<span class="nc" id="L79">        extractEntity.setPeriod(period);</span>
+<span class="nc" id="L80">        extractEntity.setStatus(LoadStatus.ACTIVO);</span>
+<span class="nc" id="L81">        extractEntity.setPercentAdvance(0);</span>
+<span class="nc" id="L82">        extractEntity.setUser(userId);</span>
+
+<span class="nc" id="L84">        ExtractEntity savedEntity = extractRepository.save(extractEntity);</span>
+<span class="nc" id="L85">        String extractId = savedEntity.getId();</span>
+
+<span class="nc" id="L87">        processStateService.registerProcess(extractId);</span>
+
+<span class="nc" id="L89">        String token = ((JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getToken().getTokenValue();</span>
+<span class="nc" id="L90">        String productName = loaderTrait.getProductById(productId, token).getDescription();</span>
+
+<span class="nc" id="L92">        extractProcessorService.processExtractsAsync(</span>
+                extractId,
+                productId,
+<span class="nc" id="L95">                indexFile.getProcessId(),</span>
+<span class="nc" id="L96">                indexFile.getRoute(),</span>
+<span class="nc" id="L97">                indexFile.getClientsProcessed(),</span>
+                productName,
+                token
+        );
+
+<span class="nc" id="L102">        logger.info(&quot;[PASO 1][ID: {}] Validaciones completadas. Proceso asíncrono lanzado en segundo plano.&quot;, extractId);</span>
+<span class="nc" id="L103">        return extractMapper.toDto(savedEntity);</span>
+    }
+
+    @Override
+    public Page&lt;ExtractResDto&gt; searchGlobal(String search, boolean getAllExtracts, Pageable pageable) {
+
+<span class="nc" id="L109">        Specification&lt;ExtractEntity&gt; spec = buildGlobalSearchSpecification(search, getAllExtracts);</span>
+
+<span class="nc" id="L111">        Page&lt;ExtractEntity&gt; resultPage = extractRepository.findAll(spec, pageable);</span>
+
+<span class="nc" id="L113">        return mapToResponsePage(resultPage);</span>
+    }
+
+    private Specification&lt;ExtractEntity&gt; buildGlobalSearchSpecification(String search, boolean getAllExtracts) {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        Specification&lt;ExtractEntity&gt; baseSpec = getAllExtracts ?</span>
+<span class="nc" id="L118">                Specification.where(null) :</span>
+<span class="nc" id="L119">                Specification.where(ExtractSpecification.filterByStatus(&quot;FINALIZADO&quot;));</span>
+
+<span class="nc bnc" id="L121" title="All 4 branches missed.">        if (search == null || search.trim().isEmpty()) {</span>
+<span class="nc" id="L122">            return baseSpec;</span>
+        }
+
+<span class="nc" id="L125">        List&lt;String&gt; productIds = productTrait.searchProducts(search).stream()</span>
+<span class="nc" id="L126">                .map(ProductCodeDescriptionDTO::getId)</span>
+<span class="nc" id="L127">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L129">        List&lt;String&gt; userIds = userTrait.searchUsers(search).stream()</span>
+<span class="nc" id="L130">                .map(UserNameAndEmailDto::getId)</span>
+<span class="nc" id="L131">                .collect(Collectors.toList());</span>
+
+
+<span class="nc" id="L134">        Specification&lt;ExtractEntity&gt; searchSpec = Specification</span>
+<span class="nc" id="L135">                .where(ExtractSpecification.filterByPeriod(search))</span>
+<span class="nc" id="L136">                .or(ExtractSpecification.filterByPercentAdvance(search))</span>
+<span class="nc" id="L137">                .or(ExtractSpecification.filterByProductIds(productIds))</span>
+<span class="nc" id="L138">                .or(ExtractSpecification.filterByUserIds(userIds));</span>
+
+<span class="nc" id="L140">        return baseSpec.and(searchSpec);</span>
+    }
+
+    private Page&lt;ExtractResDto&gt; mapToResponsePage(Page&lt;ExtractEntity&gt; resultPage) {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (resultPage.isEmpty()) {</span>
+<span class="nc" id="L145">            return Page.empty();</span>
+        }
+
+<span class="nc" id="L148">        List&lt;String&gt; productIds = resultPage.getContent().stream()</span>
+<span class="nc" id="L149">                .map(ExtractEntity::getProductId)</span>
+<span class="nc" id="L150">                .filter(Objects::nonNull).distinct().collect(Collectors.toList());</span>
+
+<span class="nc" id="L152">        List&lt;String&gt; userIds = resultPage.getContent().stream()</span>
+<span class="nc" id="L153">                .map(ExtractEntity::getUser)</span>
+<span class="nc" id="L154">                .filter(Objects::nonNull).distinct().collect(Collectors.toList());</span>
+
+<span class="nc" id="L156">        Map&lt;String, ProductCodeDescriptionDTO&gt; productMap = productTrait.getProductsByIds(productIds).stream()</span>
+<span class="nc" id="L157">                .collect(Collectors.toMap(ProductCodeDescriptionDTO::getId, Function.identity()));</span>
+
+<span class="nc" id="L159">        Map&lt;String, UserNameAndEmailDto&gt; userMap = userTrait.getUsersByIds(userIds).stream()</span>
+<span class="nc" id="L160">                .collect(Collectors.toMap(UserNameAndEmailDto::getId, Function.identity()));</span>
+
+
+<span class="nc" id="L163">        return resultPage.map(entity -&gt; new ExtractResDto(</span>
+<span class="nc" id="L164">                entity.getId(),</span>
+<span class="nc" id="L165">                entity.getPeriod(),</span>
+<span class="nc" id="L166">                entity.getStatus().toString(),</span>
+<span class="nc" id="L167">                entity.getPercentAdvance(),</span>
+<span class="nc" id="L168">                entity.getCreatedAt(),</span>
+<span class="nc" id="L169">                entity.getDetails(),</span>
+<span class="nc" id="L170">                productMap.get(entity.getProductId()),</span>
+<span class="nc" id="L171">                userMap.get(entity.getUser())</span>
+        ));
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
