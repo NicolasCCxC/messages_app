@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Configuration
 @ConfigurationProperties(prefix = "extract")
+@SuppressWarnings("unused")
 public class ExtractProperties {
 
     private Process process = new Process();
@@ -22,6 +23,7 @@ public class ExtractProperties {
         private String defaultOutputPath = "extracts_output";
         private String barcodeWidth = "350";
         private String barcodeHeight = "50";
+        private String structureFieldFontSize = "11px";
     }
 
     @Data

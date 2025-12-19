@@ -134,6 +134,7 @@ public class ExtractOrchestratorServiceImpl implements ExtractOrchestratorServic
         Specification<ExtractEntity> searchSpec = Specification
                 .where(ExtractSpecification.filterByPeriod(search))
                 .or(ExtractSpecification.filterByPercentAdvance(search))
+                .or(ExtractSpecification.filterByDate(search))
                 .or(ExtractSpecification.filterByProductIds(productIds))
                 .or(ExtractSpecification.filterByUserIds(userIds));
 

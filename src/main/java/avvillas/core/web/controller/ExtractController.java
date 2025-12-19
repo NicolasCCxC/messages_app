@@ -30,6 +30,7 @@ public class ExtractController {
 
     @PostMapping("/generate")
     public ResponseEntity<ApiResponse<ExtractDto>> generateExtract(@Valid @RequestBody ExtractDto request, Authentication authentication) {
+        System.out.println("HERE");
         Authentication auth = authentication != null ? authentication : SecurityContextHolder.getContext().getAuthentication();
         String userId = auth != null ? auth.getName() : null;
         ExtractDto extract = extractService.generateExtracts(request, userId);

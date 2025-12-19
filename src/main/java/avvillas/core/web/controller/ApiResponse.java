@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Getter
+@SuppressWarnings("unused")
 public class ApiResponse<T> {
     private final T data;
     private final List<String> message;

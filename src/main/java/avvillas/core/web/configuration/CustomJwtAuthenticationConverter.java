@@ -5,7 +5,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 public class CustomJwtAuthenticationConverter extends JwtAuthenticationConverter {
 
-    CustomJwtAuthenticationConverter() {
+    public CustomJwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
         jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");

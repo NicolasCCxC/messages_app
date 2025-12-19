@@ -8,7 +8,8 @@ public enum IndexFileFieldNames {
     PERIOD("period"),
     PRODUCT_ID("productId"),
     USER("user"),
-    PERCENT_ADVANCE("percentAdvance");
+    PERCENT_ADVANCE("percentAdvance"),
+    CREATED_AT("createdAt");
 
     private final String fieldName;
 

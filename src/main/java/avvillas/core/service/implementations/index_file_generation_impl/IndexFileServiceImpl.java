@@ -7,11 +7,15 @@ import avvillas.core.persistence.entity.IndexFileEntity;
 import avvillas.core.persistence.mapper.IndexFileMapper;
 import avvillas.core.persistence.repository.IndexFileRepository;
 import avvillas.core.service.IndexFileService;
+import avvillas.core.service.dto.UserNameAndEmailDto;
 import avvillas.core.service.dto.index_file.IndexDto;
 import avvillas.core.service.dto.path_index_file.PathExtractsArchiveIndexDto;
+import avvillas.core.service.dto.product.ProductCodeDescriptionDTO;
 import avvillas.core.service.specification.IndexFileSpecification;
 import avvillas.core.web.controller.exception.GlobalExceptionHandler;
 import avvillas.core.web.traits.LoaderTrait;
+import avvillas.core.web.traits.ProductTrait;
+import avvillas.core.web.traits.UserTrait;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -21,8 +25,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Base64;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +38,11 @@ public class IndexFileServiceImpl implements IndexFileService {
     private final IndexFileRepository indexFileRepository;
     private final IndexFileAsyncProcessor indexFileAsyncProcessor;
 
-    private final LoaderTrait productTrait;
+
+    private final LoaderTrait loaderTrait;
+
+    private final ProductTrait productTrait;
+    private final UserTrait userTrait;
 
     @Value("${MAX_RECORDS_PER_FILE}")
     private int maxRecordsPerFile;
@@ -47,16 +57,16 @@ public class IndexFileServiceImpl implements IndexFileService {
                         throw new GlobalExceptionHandler.GlobalMessageException((MessageConstant.format(IndexFileMessage.ERROR_INDEX_FILE_PROCESS, productId)));
                 });
 
-        PathExtractsArchiveIndexDto path = productTrait.getIndexFilePathByProductId(productId);
+        PathExtractsArchiveIndexDto path = loaderTrait.getIndexFilePathByProductId(productId);
 
 
         JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         String token = authentication.getToken().getTokenValue();
 
-        productTrait.getProductById(productId, token);
+        loaderTrait.getProductById(productId, token);
 
         IndexFileEntity indexEntity = indexFileMapper.toEntity(indexDto);
-        indexEntity.setRoute("indices");
+        indexEntity.setRoute(path.getRouteOutputExtract());
         indexEntity.setStatus(LoadStatus.ACTIVO);
         indexEntity.setUser(extractEmailFromToken(token));
         indexEntity.setClientsProcessed(0);
@@ -69,18 +79,36 @@ public class IndexFileServiceImpl implements IndexFileService {
         return indexFileMapper.toDto(savedEntity);
     }
 
+    @Override
     public Page<IndexDto> searchGlobal(String search, Pageable pageable) {
 
-        if (search == null || search.trim().isEmpty()) return getAll(pageable);
+        if (search == null || search.trim().isEmpty()) {
+            return getAll(pageable);
+        }
 
-        Specification<IndexFileEntity> specification = Specification.where(
-                        IndexFileSpecification.filterByStatus(search)
-                ).or(IndexFileSpecification.filterByProductId(search))
-                .or(IndexFileSpecification.filterByPeriod(search))
-                .or(IndexFileSpecification.filterByPercentAdvance(search))
-                .or(IndexFileSpecification.filterByUser(search));
+        String trimmedSearch = search.trim();
+        
+        List<String> productIds = productTrait.searchProducts(trimmedSearch).stream()
+                .map(ProductCodeDescriptionDTO::getId)
+                .collect(Collectors.toList());
 
-        return indexFileRepository.findAll(specification, pageable)
+        List<String> userIds = userTrait.searchUsers(trimmedSearch).stream()
+                .map(UserNameAndEmailDto::getId)
+                .collect(Collectors.toList());
+
+
+        Specification<IndexFileEntity> globalSpec = (root, query, builder) -> builder.disjunction();
+
+        globalSpec = globalSpec
+                .or(IndexFileSpecification.filterByPeriod(trimmedSearch))
+                .or(IndexFileSpecification.filterByPercentAdvance(trimmedSearch))
+                .or(IndexFileSpecification.filterByDate(trimmedSearch))
+                .or(IndexFileSpecification.filterByUserIds(userIds))
+                .or(IndexFileSpecification.filterByProductIds(productIds))
+                .or(IndexFileSpecification.filterByStatus(trimmedSearch));
+
+
+        return indexFileRepository.findAll(globalSpec, pageable)
                 .map(indexFileMapper::toDto);
     }
 

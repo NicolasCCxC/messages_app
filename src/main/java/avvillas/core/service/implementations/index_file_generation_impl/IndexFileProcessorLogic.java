@@ -88,7 +88,7 @@ public class IndexFileProcessorLogic {
                 throw new GlobalExceptionHandler.GlobalMessageException((MessageConstant.format(LOAD_FILE_ENTRY_NOT_FOUND, productName)));
             }
 
-            Path indicesDir = Paths.get("indices");
+            Path indicesDir = Paths.get(path.getRouteOutputIndex());
 
             if (!Files.exists(indicesDir)) {
                 Files.createDirectory(indicesDir);
@@ -154,8 +154,7 @@ public class IndexFileProcessorLogic {
                                                         if (Objects.equals(field.getContent(), exitRoute)) {
 
                                                             String routeOutputExtract = path.getRouteOutputExtract();
-                                                            if (!routeOutputExtract.endsWith("/"))
-                                                                routeOutputExtract = routeOutputExtract + "/";
+                                                            if (!routeOutputExtract.endsWith("/")) routeOutputExtract = routeOutputExtract + "/";
 
                                                             pdfNameBuilder.append(";").append(routeOutputExtract);
                                                             pdfNameBuilder.append(dataMap.get("fileName").toString()).append(".pdf");

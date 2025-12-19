@@ -13,6 +13,7 @@ services:
       URL_GATEWAY: ${URL_GATEWAY}
       PROCESSING_TIME: ${PROCESSING_TIME}
       PDF_GENERATION_TIME: ${PDF_GENERATION_TIME}
+      FONT_SIZE_FIELDS: ${FONT_SIZE_FIELDS}
       # ======================================================================
       # 2. CONFIGURACION DE RENDIMIENTO
       # Estos son los parametros mas importantes para ajustar la velocidad y el

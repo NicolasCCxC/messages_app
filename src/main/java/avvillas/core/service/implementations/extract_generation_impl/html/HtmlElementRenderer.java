@@ -21,20 +21,23 @@ public class HtmlElementRenderer {
     private static final Logger logger = LoggerFactory.getLogger(HtmlElementRenderer.class);
 
     private static final int LINE_HEIGHT = 18;
-    private static final String BASE_ELEMENT_STYLE = "font-weight: 100 !important; font-size: 11px !important; position: absolute;";
     private static final String BARCODE_PREFIX = "BARCODE::";
     private static final String MONEY_PREFIX = "MONEY::";
 
-
     private final BarcodeService barcodeService;
     private final ExtractProperties extractProperties;
+
+    private String getBaseElementStyle() {
+        String fontSize = extractProperties.getProcess().getStructureFieldFontSize();
+        return String.format("font-weight: 100 !important; font-size: %s !important; position: absolute;", fontSize);
+    }
 
     private String createMoneyElement(String prefixedValue, int x, int y) {
         String content = prefixedValue.substring(MONEY_PREFIX.length());
         int columnWidth = 75;
         return String.format(
                 "<div style=\"%s left: %dpx; top: %dpx; width: %dpx; text-align: right;\">%s</div>",
-                BASE_ELEMENT_STYLE, x, y, columnWidth, content
+                getBaseElementStyle(), x, y, columnWidth, content
         );
     }
 
@@ -88,7 +91,7 @@ public class HtmlElementRenderer {
     }
 
     private String createPositionedElement(String content, int x, int y) {
-        return "<span style=\"" + BASE_ELEMENT_STYLE +
+        return "<span style=\"" + getBaseElementStyle() +
                 " left: " + x + "px; top: " + y + "px;\">" +
                 content + "</span>";
     }

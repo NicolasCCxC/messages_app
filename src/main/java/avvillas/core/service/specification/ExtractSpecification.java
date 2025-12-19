@@ -9,7 +9,8 @@ import java.util.List;
 
 public class ExtractSpecification {
 
-    private ExtractSpecification() {}
+    private ExtractSpecification() {
+    }
 
     public static Specification<ExtractEntity> filterByPeriod(String search) {
 
@@ -37,4 +38,16 @@ public class ExtractSpecification {
         }
         return (root, query, builder) -> root.get("user").in(userIds);
     }
+
+    public static Specification<ExtractEntity> filterByDate(String search) {
+        final String field = IndexFileFieldNames.CREATED_AT.getFieldName();
+
+        Specification<ExtractEntity> rangeSpec = SpecificationUtils.filterByDateRange(field, search);
+
+        Specification<ExtractEntity> likeSpec = SpecificationUtils.timestampLikeIgnoreCase(field, search);
+
+        return Specification.where(rangeSpec).or(likeSpec);
+    }
+
+
 }
