@@ -2,9 +2,9 @@
 # Script to generate extract/
 
 # Variables
-BASE_URL="http://192.168.1.70:8087/core"
+BASE_URL="http://192.168.1.83:8087/core"
 ENDPOINT="/extract/generate"
-API_KEY="sk-test-1234567890abcdef1234567890abcdef"
+API_KEY="sk-test-1234567890abcdef1234567890abc"
 
 # JSON with the fields required for testing
 JSON_DATA='{"productId":"00000000-0000-4000-a000-000000000000","period":"20250804"}'

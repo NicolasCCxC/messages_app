@@ -1,8 +1,9 @@
 # PowerShell script to call the Extract API
 
 # Set variables
-$baseUrl = "http://localhost:8087/core"
+$baseUrl = "http://192.168.1.83:8087/core"
 $endpoint = "/extract/generate"
+$apiKey = "sk-test-1234567890abcdef1234567890abc" # <--- ADDED API KEY
 
 # Set JSON data with required fields for ExtractDto
 $jsonData = @{
@@ -17,10 +18,14 @@ Write-Host "Request Body: $jsonData"
 
 # Make the API call using Invoke-RestMethod
 try {
-    $response = Invoke-RestMethod -Uri "$baseUrl$endpoint" -Method Post -ContentType "application/json" -Body $jsonData
+    $response = Invoke-RestMethod -Uri "$baseUrl$endpoint" `
+        -Method Post `
+        -ContentType "application/json" `
+        -Headers @{ "API-KEY" = $apiKey } `
+        -Body $jsonData
 
     # Display the response
-    Write-Host "`nAPI Response:"
+    Write-Host "`nAPI Response:" -ForegroundColor Green
     Write-Host "Product ID: $($response.data.productId)"
     Write-Host "Period: $($response.data.period)"
     Write-Host "State: $($response.data.state)"
@@ -32,9 +37,12 @@ try {
 catch {
     Write-Host "`nError calling API:" -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
-    if ($_.ErrorDetails.Message) {
+   if ($_.ErrorDetails) {
         Write-Host "Details: $($_.ErrorDetails.Message)" -ForegroundColor Red
-    }
+       } elseif ($_.Exception.Response) {
+           $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+           Write-Host "Server Response: $($reader.ReadToEnd())" -ForegroundColor Red
+       }
 }
 
 # Pause to see the results

@@ -36,7 +36,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String apiKey = request.getHeader("APY-KEY");
+        String apiKey = request.getHeader("API-KEY");
 
         if (apiKey != null && apiKey.equals(validApiKey)) {
             List<SimpleGrantedAuthority> authorities = List.of(
