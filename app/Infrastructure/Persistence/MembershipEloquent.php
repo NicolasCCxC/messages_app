@@ -126,7 +126,7 @@ class MembershipEloquent
             $request['payu_data'] = $this->payService->getDataCompanyPayu($request['company_id'])['data']['payu_data'];
             $payTransaction = $this->model::with('payTransaction')
                 ->where('company_id', $request['company_id'])
-                ->orderBy('created_at')
+                ->orderBy('purchase_date', 'asc')
                 ->first();
             $invoice = collect($payTransaction)["pay_transaction"]["json_invoice"];
             if (isset(json_decode($invoice, true)["additional_customer_data"])) {
