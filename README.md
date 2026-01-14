@@ -1,6 +1,6 @@
 # FamiEFI Back Base
 
-**Php: 8.1^**
+**Php: 7.3^**
 
 Requisites
 - Docker
@@ -56,8 +56,8 @@ It's mandatory use the next structure to send responses
 - Any error message must be in message followed by its internal or external code.
 - All dates must be delivered to the front in unix date format
 - All book values must be delivered as Double.
-- Every calculation or additional field must respect the same level of its parent object. 
-EX: If the withholding tax is calculated for each invoice, the source field will be within the invoice that the calculation was applied to.
+- Every calculation or additional field must respect the same level of its parent object.
+  EX: If the withholding tax is calculated for each invoice, the source field will be within the invoice that the calculation was applied to.
 ```
 Entity: invoice:[{
             id:1,
@@ -76,9 +76,6 @@ Response: invoice:[{
         }]
 ```
 
-## CommunicationBetweenServicesTrait
-
-The trait CommunicationBetweenServicesTrait most be used in all microservices except in Security.
 
 ## Documentation
 - [Lumen documentation](https://lumen.laravel.com/docs/8.x)
@@ -97,12 +94,14 @@ The trait CommunicationBetweenServicesTrait most be used in all microservices ex
 - When you create a trait, you must add Trait to the end of the word `ExampleTrait.php`
 - The nomenclature is defined by [PSR-4](https://www.php-fig.org/psr/psr-4/)
 
-## Job Execution
-This project relies on several jobs to handle background tasks. Make sure these jobs are running on the system for scheduled tasks to work properly.
+## Notes
+- The project use prefix 'api **/auth/** {service}' like a **Guard** for access to the endpoints without token.
 
-### List of Jobs
-The following jobs need to be executed:
+## Commands
+app:update-module-one-memberships {--action= : Upsert, add or remove module 1 (Digitalization of physical stores) to last membership by all companies
+- php artisan app:update-module-one-memberships --help
+- php artisan app:update-module-one-memberships --action=add
+- php artisan app:update-module-one-memberships --action=remove
 
-- `UpdateTransferTask` - Responsible for updating the status of all transfers in the system.
-
-
+app:update-history-invoice-memberships - Command used to update the invoice counter history
+- php artisan app:update-history-invoice-memberships

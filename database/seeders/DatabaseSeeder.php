@@ -2,16 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\CompanyPaymentGateway;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Run the database seeds.
+     *
+     * @return void
      */
-    public function run(): void
+    public function run()
     {
-        CompanyPaymentGateway::factory()->create();
+        $this->call(WebsiteUsersSeed::class);
+        $this->call(CiiuSeeder::class);
+        $this->call(ResolutionSeeder::class);
     }
 }

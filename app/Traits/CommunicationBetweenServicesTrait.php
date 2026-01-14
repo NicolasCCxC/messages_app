@@ -2,92 +2,60 @@
 
 namespace App\Traits;
 
-use Exception;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\HttpFoundation\Response;
 
 trait CommunicationBetweenServicesTrait
 {
-
-    public function makeRequest(string $method, string $service, string $resource, string $userId, string $companyId, array $data = [], bool $allResponse = false)
+    protected function auth() : array
     {
-        $image = $data['image'] ?? null;
-        unset($data['image']);
-        $request = [
-            'resource' => $resource,
-            'method' => strtoupper($method),
-            'service' => strtoupper($service),
-            'user_id' => $userId ?? Str::uuid()->toString(),
-            'company_id' => $companyId ?? Str::uuid()->toString(),
-            'data' => $data
+        $data = array(
+            'email' => env('app.USER_AUTH','fgonzalez@ccxc.us'),
+            'password' => env('app.PASSWORD_AUTH','@!F+CCxC2@2@+E!@'),
+        );
+
+        $response = Http::post(env('app.URL_GATEWAY', 'https://qa-api-security.famiefi.com').'/api/auth/login',$data);
+
+        $token = $response->json()['data']['access_token'];
+
+        $request = array (
+            'resource' => '',
+            'method' => '',
+            'service' => '',
+            'user_id' => $response->json()['data']['user']['id'],
+            'company_id' => $response->json()['data']['user']['company_id'],
+            'data' =>
+            array (
+            ),
+        );
+
+        return [
+            'request' => $request,
+            'token' => $token
         ];
-
-        if ($request['service'] == 'SECURITY') {
-            if (in_array($request['method'], ['GET', 'POST', 'PUT', 'DELETE'])) {
-                $method = strtolower($request['method']);
-                $response = Http::withToken(env('SERVICE_TOKEN'))
-                    ->$method(env('URL_GATEWAY') . $request['resource'],
-                        $request
-                    );
-            }
-        } else {
-            if ($image ==! null){
-                $response = Http::withToken(env('SERVICE_TOKEN'))
-                    ->attach('file', $image->get(), $image->getClientOriginalName())
-                    ->post(env('URL_GATEWAY') . 'api/gateway',
-                        $request
-                    );
-            }else{
-                $response = Http::withToken(env('SERVICE_TOKEN'))
-                    ->timeout(50)
-                    ->post(env('URL_GATEWAY') . 'api/gateway',
-                        $request
-                    );
-            }
-        }
-
-        $badStatus = [
-            Response::HTTP_BAD_REQUEST,
-            Response::HTTP_UNAUTHORIZED,
-            Response::HTTP_NOT_FOUND,
-            Response::HTTP_UNPROCESSABLE_ENTITY,
-            Response::HTTP_FAILED_DEPENDENCY
-        ];
-
-        if (isset($response['statusCode']) && in_array($response['statusCode'], $badStatus)) {
-            return $response->json();
-        } elseif ($response->json() === null) {
-            return [];
-        }
-
-        return $allResponse ? $response->json() : $response->json()['data'];
     }
 
-    public function getSecurity(string $url)
+    public function makeRequest(string $method, string $service, string $resource, array $data = []) : array
     {
-        $response = Http::withToken(env('SERVICE_TOKEN'))
-            ->get(env('URL_GATEWAY') . 'api/' . $url);
+        $requestAndToken = $this->auth();
+        $request = $requestAndToken['request'];
+        $token = $requestAndToken ['token'];
 
-        if (isset($response['statusCode']) && in_array($response['statusCode'], [400, 401, 404, 422])) {
+        $request['method'] = strtoupper($method);
+        $request['resource'] = $resource;
+        $request['service'] = strtoupper($service);
+        $request['data'] = $data;
+
+        $response = Http::withToken($token)
+            ->post(env('app.URL_GATEWAY', 'https://qa-api-security.famiefi.com').'/api/'.strtolower($service),
+            $request
+        );
+
+        if($response->json()['statusCode'] != 202)
             return $response->json();
-        }
+
+        if(!is_array($response->json()['data']))
+           return [$response->json()['data']];
+
         return $response->json()['data'];
-    }
-
-    public function postSecurity(string $url, array $data)
-    {
-        try {
-            $response = Http::withToken(env('SERVICE_TOKEN'))
-                ->post(env('URL_GATEWAY') . 'api/' . $url, $data);
-
-            if (isset($response['statusCode']) && in_array($response['statusCode'], [Response::HTTP_BAD_REQUEST, Response::HTTP_NOT_FOUND, rESPONSE::HTTP_UNAUTHORIZED, Response::HTTP_UNPROCESSABLE_ENTITY], true)) {
-                return $response->json();
-            }
-            return $response->json()['data'];
-
-        } catch (Exception $e) {
-            return [];
-        }
     }
 }

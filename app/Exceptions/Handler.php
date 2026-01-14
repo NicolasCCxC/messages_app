@@ -2,86 +2,101 @@
 
 namespace App\Exceptions;
 
+use App\Models\Module;
 use App\Traits\ResponseApiTrait;
-use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-
     use ResponseApiTrait;
 
     /**
-     * A list of the exception types that should not be reported.
+     * A list of the exception types that are not reported.
      *
      * @var array
      */
     protected $dontReport = [
-        AuthorizationException::class,
-        HttpException::class,
-        ModelNotFoundException::class,
-        ValidationException::class,
+        //
     ];
 
     /**
-     * Report or log an exception.
+     * The list of the inputs that are never flashed to the session on validation exceptions.
      *
-     * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
-     *
-     * @param Throwable $exception
-     * @return void
-     *
-     * @throws Exception
+     * @var array<int, string>
      */
-    public function report(Throwable $exception)
-    {
-        parent::report($exception);
-    }
+    protected $dontFlash = [
+        'current_password',
+        'password',
+        'password_confirmation',
+    ];
 
     /**
-     * Render an exception into an HTTP response.
+     * Register the exception handling callbacks for the application.
      *
-     * @param  Request  $request
-     * @param Throwable $exception
-     * @return JsonResponse
-     *
-     * @throws Throwable
+     * @return void
      */
-    public function render($request, Throwable $exception)
+    public function register()
     {
-        // Default values to handler
-        $message = env('APP_DEBUG') == true ? $exception->getMessage() : Response::$statusTexts[Response::HTTP_BAD_REQUEST];
-        $errors = env('APP_DEBUG') == true ? $exception->getTrace() : [];
+        $this->renderable(function (Throwable $e) {
+            return $this->handleException($e);
+        });
+    }
 
+    public function handleException(Throwable $e): JsonResponse
+    {
+        $serviceName = Module::SECURITY;
+        $message = env('APP_DEBUG') == true ? $e->getMessage() : Response::$statusTexts[Response::HTTP_BAD_REQUEST];
+        $errors = env('APP_DEBUG') == true ? $e->getTrace() : [];
         $statusCode = Response::HTTP_BAD_REQUEST;
+        switch (get_class($e)) {
+            case UnauthorizedHttpException::class :
+                $message = 'Unauthorized access';
+                $statusCode = Response::HTTP_UNAUTHORIZED;
+                break;
+            case AuthorizationException::class :
+                $message = $e->getMessage();
+                $statusCode = $e->getCode();
+                break;
 
-        switch (get_class($exception)) {
-            case HttpException::class:
-                $statusCode = $exception->getStatusCode();
-                $message = Response::$statusTexts[$statusCode];
+            case ValidationException::class :
+                $errors = $e->validator->errors()->getMessages();
+                $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
+                $message = $e->getMessage();
                 break;
+
             case ModelNotFoundException::class:
-                $model = strtolower(class_basename($exception->getModel()));
+                $model = strtolower(class_basename($e->getModel()));
                 $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
-                $message = "Does not exist any instance of {$model} with the given data";
+                $message = "Does not exist any instance of ${model} with the given data";
                 break;
-            case ValidationException::class:
-                $errors = $exception->validator->errors()->getMessages();
+
+            case BadRequestHttpException::class:
+                $serviceName = Module::WEBSITE;
                 $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
-                $message = $exception->getMessage();
+                $message = $e->getMessage();
                 break;
-            case PayErrorException::class:
-                $errors = [];
+
+            case HttpException::class:
+                $statusCode = $e->getStatusCode();
+                $message = env('APP_DEBUG') == true ? $e->getMessage() : Response::$statusTexts[$statusCode];
+                break;
+
+            case GuzzleException::class :
+                $statusCode = $e->getCode();
+                $message = $e->getMessage();
+
         }
 
-        return $this->errorResponse($statusCode, $message, $errors);
+        return $this->errorResponse($serviceName, $statusCode, $message, $errors);
     }
 }
