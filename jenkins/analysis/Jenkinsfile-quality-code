@@ -1,16 +1,16 @@
-@Library('mySharedLib') _
-
-// Nombre del repositorio en git
-def repoName = 'avvillas-api-core'
-
-// Credenciales en Jenkins
-def credentialParams = [
-    sonar_properties_secret_file_id: "${repoName}-sonar"        // Nombres de la credencial declarada en Jenkins para determinar el archivo sonar.properties a utilizar
-]
-
-def otherParams = [
-    maven_version:   '3.9.9',                                   // Numero de version de Maven manejada en el proyecto                                 
-    java_version:    '21'                                       // Numero de version de Java manejada en el proyecto
-]
-
-analysisSonarQube(credentialParams + otherParams)
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
