@@ -1,38 +1,5 @@
-> $companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
+$companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
 
-// This is the logic you fixed. If it doesn't crash, it's working.
-$payTransaction = \App\Models\Membership::with('payTransaction')
-    ->where('company_id', $companyId)
-    ->orderBy('purchase_date', 'desc') 
-    ->first();
+$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('purchase_date', 'desc')->first();
 
-// Check if it actually found a result
-if ($payTransaction) {
-    echo "Success! Found membership from: " . $payTransaction->purchase_date;
-} else {
-    echo "Query worked, but no memberships found for this company.";
-= "83e80ae5-affc-32b4-b11d-b4cab371c48b"
-
-> // This is the logic you fixed. If it doesn't crash, it's working.
-> $payTransaction = \App\Models\Membership::with('payTransaction')
-= Illuminate\Database\Eloquent\Builder {#6059 …1}
-
->    ->where('company_id', $companyId)
-
-   PARSE ERROR  PHP Parse error: Syntax error, unexpected T_OBJECT_OPERATOR in vendor/psy/psysh/src/Exception/ParseErrorException.php on line 44.
-
->     ->orderBy('purchase_date', 'desc') 
-
-   PARSE ERROR  PHP Parse error: Syntax error, unexpected T_OBJECT_OPERATOR in vendor/psy/psysh/src/Exception/ParseErrorException.php on line 44.
-
->     ->first();
-
-   PARSE ERROR  PHP Parse error: Syntax error, unexpected T_OBJECT_OPERATOR in vendor/psy/psysh/src/Exception/ParseErrorException.php on line 44.
-
-> 
-> // Check if it actually found a result
-> if ($payTransaction) {
-.     echo "Success! Found membership from: " . $payTransaction->purchase_date;
-. } else {
-.     echo "Query worked, but no memberships found for this company.";
-. }
+if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
