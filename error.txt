@@ -71,3 +71,28 @@ if ($result) {
 } else {
     echo "Query executed successfully but no record was found.";
 }
+
+
+---- new error: 
+
+➜  famiefi-api-security git:(calidad-viejo-7036) ✗ php artisan tinker
+Psy Shell v0.12.14 (PHP 8.2.28 — cli) by Justin Hileman
+New PHP manual is available (latest: 3.0.1). Update with `--update-manual`
+> $persistence = new \App\Infrastructure\Persistence\MembershipEloquent();
+$companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
+$result = $persistence->getLastTransactionByCompany($companyId);
+if ($result) { echo "Found! ID: " . $result->id . " | Date: " . $result->purchase_date; } else { echo "Query executed successfully but no record was= App\Infrastructure\Persistence\MembershipEloquent {#6032}
+
+> companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
+
+   PARSE ERROR  PHP Parse error: Syntax error, unexpected '=' in vendor/psy/psysh/src/Exception/ParseErrorException.php on line 44.
+
+> $result = $persistence->getLastTransactionByCompany($companyId);
+
+   Error  Call to undefined method App\Infrastructure\Persistence\MembershipEloquent::getLastTransactionByCompany().
+
+> if ($result) { echo "Found! ID: " . $result->id . " | Date: " . $result->purchase_date; } else { echo "Query executed successfully but no record was found.";}
+
+   WARNING  Undefined variable $result in /Users/nicolassanchez--desarrolladorestandar/Desktop/diggipymes/famiefi-api-securityeval()'d code.
+
+Query executed successfully but no record was found.⏎
