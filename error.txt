@@ -35,3 +35,21 @@ $companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
 $payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('purchase_date', 'desc')->first();
 
 if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
+
+
+--------------
+    /**
+     * Get last transaction by company
+     *
+     * @param string $companyId
+     * @return model::all();
+     */
+    public function getLastTransactionByCompany(string $companyId)
+    {
+        return $this->model::where('company_id', $companyId)
+            ->orderBy('created_at')
+            ->first();
+    }
+
+
+     $payTransaction = $this->payTransactionEloquent->getLastTransactionByCompany($request['company_id']);
