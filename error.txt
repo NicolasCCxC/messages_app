@@ -1,5 +1,27 @@
 $companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
 
-$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('purchase_date', 'desc')->first();
+$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('created_at')->first();
 
 if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
+
+
+$companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
+
+$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('purchase_date', 'asc)->first();
+
+if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
+
+
+message error: 
+
+> $companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('created_at')->first();if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
+
+   Illuminate\Database\QueryException  SQLSTATE[42703]: Undefined column: 7 ERROR:  column "created_at" does not exist
+LINE 1: ...om "memberships" where "company_id" = $1 order by "created_a...
+                                                             ^ (Connection: pgsql, SQL: select * from "memberships" where "company_id" = 83e80ae5-affc-32b4-b11d-b4cab371c48b order by "created_at" asc limit 1).
+
+> $companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('purchase_date’, ‘asc’)->first();if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
+
+   PARSE ERROR  PHP Parse error: Syntax error, unexpected T_ENCAPSED_AND_WHITESPACE in vendor/psy/psysh/src/Exception/ParseErrorException.php on line 44.
+
+> 
