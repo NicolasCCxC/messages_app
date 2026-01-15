@@ -53,3 +53,21 @@ if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction
 
 
      $payTransaction = $this->payTransactionEloquent->getLastTransactionByCompany($request['company_id']);
+
+
+
+     ------TEST------
+     // 1. Instantiate the class
+$persistence = new \App\Infrastructure\Persistence\MembershipEloquent();
+
+// 2. Define the ID (use the one from your logs)
+$companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
+
+// 3. Call the method and check results
+$result = $persistence->getLastTransactionByCompany($companyId);
+
+if ($result) {
+    echo "Found! ID: " . $result->id . " | Date: " . $result->purchase_date;
+} else {
+    echo "Query executed successfully but no record was found.";
+}
