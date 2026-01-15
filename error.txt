@@ -25,3 +25,13 @@ LINE 1: ...om "memberships" where "company_id" = $1 order by "created_a...
    PARSE ERROR  PHP Parse error: Syntax error, unexpected T_ENCAPSED_AND_WHITESPACE in vendor/psy/psysh/src/Exception/ParseErrorException.php on line 44.
 
 > 
+
+
+
+
+-----
+$companyId = '83e80ae5-affc-32b4-b11d-b4cab371c48b';
+
+$payTransaction = \App\Models\Membership::with('payTransaction')->where('company_id', $companyId)->orderBy('purchase_date', 'desc')->first();
+
+if ($payTransaction) { echo "Success! Found membership from: " . $payTransaction->purchase_date; } else { echo "Query worked, but no memberships found."; }
